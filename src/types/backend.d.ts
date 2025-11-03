@@ -60,6 +60,7 @@ export interface IUser {
     age: number;
     gender: string;
     address: string;
+    phone?: string;
     role?: {
         _id: string;
         name: string;
@@ -86,6 +87,7 @@ export interface IJob {
         logo?: string;
     }
     location: string;
+    workingModel?: string;
     salary: number;
     quantity: number;
     level: string;

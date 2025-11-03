@@ -49,7 +49,7 @@ const ModalUser = (props: IProps) => {
     }, [dataInit]);
 
     const submitUser = async (valuesForm: any) => {
-        const { name, email, password, address, age, gender, role, company } = valuesForm;
+        const { name, email, password, address, age, gender, phone, role, company } = valuesForm;
         if (dataInit?._id) {
             //update
             const user = {
@@ -59,6 +59,7 @@ const ModalUser = (props: IProps) => {
                 age,
                 gender,
                 address,
+                phone,
                 role: role?.value ?? role._id,
                 company: {
                     _id: company?.value ?? company._id,
@@ -86,6 +87,7 @@ const ModalUser = (props: IProps) => {
                 age,
                 gender,
                 address,
+                phone,
                 role: role.value,
                 company: {
                     _id: company.value,
@@ -267,6 +269,16 @@ const ModalUser = (props: IProps) => {
                             name="address"
                             rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
                             placeholder="Nhập địa chỉ"
+                        />
+                    </Col>
+                </Row>
+                <Row gutter={16}>
+                    <Col lg={12} md={12} sm={24} xs={24}>
+                        <ProFormText
+                            label="Số điện thoại"
+                            name="phone"
+                            rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
+                            placeholder="Nhập số điện thoại"
                         />
                     </Col>
                 </Row>

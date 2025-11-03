@@ -12,9 +12,9 @@ const RegisterPage = () => {
     const [isSubmit, setIsSubmit] = useState(false);
 
     const onFinish = async (values: IUser) => {
-        const { name, email, password, age, gender, address } = values;
+        const { name, email, password, age, gender, address, phone } = values as any;
         setIsSubmit(true);
-        const res = await callRegister(name, email, password as string, +age, gender, address);
+        const res = await callRegister(name, email, password as string, +age, gender, address, phone);
         setIsSubmit(false);
         if (res?.data?._id) {
             message.success('Đăng ký tài khoản thành công!');
@@ -107,6 +107,15 @@ const RegisterPage = () => {
                                 label="Địa chỉ"
                                 name="address"
                                 rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                labelCol={{ span: 24 }} //whole column
+                                label="Số điện thoại"
+                                name="phone"
+                                rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}
                             >
                                 <Input />
                             </Form.Item>

@@ -85,6 +85,7 @@ const ViewUpsertJob = (props: any) => {
                     logo: cp && cp.length > 1 ? cp[1] : ""
                 },
                 location: values.location,
+                workingModel: values.workingModel,
                 salary: values.salary,
                 quantity: values.quantity,
                 level: values.level,
@@ -116,6 +117,7 @@ const ViewUpsertJob = (props: any) => {
                     logo: cp && cp.length > 1 ? cp[1] : ""
                 },
                 location: values.location,
+                workingModel: values.workingModel,
                 salary: values.salary,
                 quantity: values.quantity,
                 level: values.level,
@@ -208,6 +210,19 @@ const ViewUpsertJob = (props: any) => {
                                     options={LOCATION_LIST.filter(item => item.value !== 'ALL')}
                                     placeholder="Please select a location"
                                     rules={[{ required: true, message: 'Vui lòng chọn địa điểm!' }]}
+                                />
+                            </Col>
+                            <Col span={24} md={6}>
+                                <ProFormSelect
+                                    name="workingModel"
+                                    label="Working Model"
+                                    valueEnum={{
+                                        AT_OFFICE: 'At office',
+                                        REMOTE: 'Remote',
+                                        HYBRID: 'Hybrid',
+                                    }}
+                                    placeholder="Please select working model"
+                                    rules={[{ required: true, message: 'Vui lòng chọn Working Model!' }]}
                                 />
                             </Col>
                             <Col span={24} md={6}>

@@ -5,8 +5,8 @@ import axios from 'config/axios-customize';
  * 
 Module Auth
  */
-export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) => {
-    return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address })
+export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string, phone: string) => {
+    return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address, phone })
 }
 
 export const callLogin = (username: string, password: string) => {
@@ -88,6 +88,18 @@ export const callDeleteUser = (id: string) => {
 
 export const callFetchUser = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IUser>>>(`/api/v1/users?${query}`);
+}
+
+export const callFetchUserById = (id: string) => {
+    return axios.get<IBackendRes<IUser>>(`/api/v1/users/${id}`);
+}
+
+export const callUpdateSelfUser = (user: Partial<IUser>) => {
+    return axios.patch<IBackendRes<IUser>>(`/api/v1/users/me`, { ...user })
+}
+
+export const callChangeSelfPassword = (currentPassword: string, newPassword: string) => {
+    return axios.patch<IBackendRes<any>>(`/api/v1/users/me/password`, { currentPassword, newPassword })
 }
 
 /**
