@@ -35,11 +35,14 @@ const ModalCompany = (props: IProps) => {
     //modal animation
     const [animation, setAnimation] = useState<string>('open');
 
-    const [loadingUpload, setLoadingUpload] = useState<boolean>(false);
+    const [loadingLogo, setLoadingLogo] = useState<boolean>(false);
+    const [loadingImages, setLoadingImages] = useState<boolean>(false);
     const [dataLogo, setDataLogo] = useState<ICompanyLogo[]>([]);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
+    const [dataImages, setDataImages] = useState<ICompanyLogo[]>([]);
+    const [dataMaps, setDataMaps] = useState<{ uid: string; value: string }[]>([]);
 
     const [value, setValue] = useState<string>("");
     const [form] = Form.useForm();
@@ -48,20 +51,34 @@ const ModalCompany = (props: IProps) => {
         if (dataInit?._id && dataInit?.description) {
             setValue(dataInit.description);
         }
+        if (dataInit?._id && (dataInit as any)?.images?.length) {
+            setDataImages((dataInit as any).images.map((img: string) => ({ name: img, uid: uuidv4() })));
+        } else {
+            setDataImages([]);
+        }
+        if (dataInit?._id && (dataInit as any)?.maps?.length) {
+            setDataMaps((dataInit as any).maps.map((m: string) => ({ uid: uuidv4(), value: m })));
+        } else {
+            setDataMaps([]);
+        }
     }, [dataInit])
 
     const submitCompany = async (valuesForm: ICompanyForm) => {
         const { name, address } = valuesForm;
 
-        if (dataLogo.length === 0) {
+        // Chỉ bắt buộc logo khi tạo mới
+        if (!dataInit?._id && dataLogo.length === 0) {
             message.error('Vui lòng upload ảnh Logo')
             return;
         }
 
         if (dataInit?._id) {
             //update
-            const res = await callUpdateCompany(dataInit._id, name, address, value, dataLogo[0].name);
-            if (res.data) {
+            const imagesToSend = (dataImages.length ? dataImages.map(i => i.name) : ((dataInit as any)?.images ?? []));
+            const mapsToSend = (dataMaps.length ? dataMaps.map(i => i.value) : ((dataInit as any)?.maps ?? []));
+            const logoToSend = (dataLogo.length ? dataLogo[0].name : ((dataInit as any)?.logo ?? ""));
+            const res = await callUpdateCompany(dataInit._id, name, address, value, logoToSend, imagesToSend, mapsToSend);
+            if (res && res.data) {
                 message.success("Cập nhật company thành công");
                 handleReset();
                 reloadTable();
@@ -73,8 +90,8 @@ const ModalCompany = (props: IProps) => {
             }
         } else {
             //create
-            const res = await callCreateCompany(name, address, value, dataLogo[0].name);
-            if (res.data) {
+            const res = await callCreateCompany(name, address, value, dataLogo[0].name, dataImages.map(i => i.name), dataMaps.map(i => i.value));
+            if (res && res.data) {
                 message.success("Thêm mới company thành công");
                 handleReset();
                 reloadTable();
@@ -91,6 +108,8 @@ const ModalCompany = (props: IProps) => {
         form.resetFields();
         setValue("");
         setDataInit(null);
+        setDataImages([]);
+        setDataMaps([]);
 
         //add animation when closing modal
         setAnimation('close')
@@ -101,6 +120,10 @@ const ModalCompany = (props: IProps) => {
 
     const handleRemoveFile = (file: any) => {
         setDataLogo([])
+    }
+
+    const handleRemoveImage = (file: any) => {
+        setDataImages(prev => prev.filter(f => f.uid !== file.uid));
     }
 
     const handlePreview = async (file: any) => {
@@ -135,15 +158,24 @@ const ModalCompany = (props: IProps) => {
         return isJpgOrPng && isLt2M;
     };
 
-    const handleChange = (info: any) => {
-        if (info.file.status === 'uploading') {
-            setLoadingUpload(true);
+    const handleChangeLogo = (info: any) => {
+        if (info?.file?.status === 'uploading') {
+            setLoadingLogo(true);
+        } else if (info?.file?.status === 'done' || info?.file?.status === 'removed') {
+            setLoadingLogo(false);
+        } else if (info?.file?.status === 'error') {
+            setLoadingLogo(false);
+            message.error(info?.file?.error?.event?.message ?? "Đã có lỗi xảy ra khi upload file.")
         }
-        if (info.file.status === 'done') {
-            setLoadingUpload(false);
-        }
-        if (info.file.status === 'error') {
-            setLoadingUpload(false);
+    };
+
+    const handleChangeImages = (info: any) => {
+        if (info?.file?.status === 'uploading') {
+            setLoadingImages(true);
+        } else if (info?.file?.status === 'done' || info?.file?.status === 'removed') {
+            setLoadingImages(false);
+        } else if (info?.file?.status === 'error') {
+            setLoadingImages(false);
             message.error(info?.file?.error?.event?.message ?? "Đã có lỗi xảy ra khi upload file.")
         }
     };
@@ -159,6 +191,19 @@ const ModalCompany = (props: IProps) => {
         } else {
             if (onError) {
                 setDataLogo([])
+                const error = new Error(res.message);
+                onError({ event: error });
+            }
+        }
+    };
+
+    const handleUploadFileImages = async ({ file, onSuccess, onError }: any) => {
+        const res = await callUploadSingleFile(file, "company");
+        if (res && (res as any).data) {
+            setDataImages(prev => ([...prev, { name: (res as any).data?.fileName, uid: uuidv4() }]));
+            if (onSuccess) onSuccess('ok')
+        } else {
+            if (onError) {
                 const error = new Error(res.message);
                 onError({ event: error });
             }
@@ -214,14 +259,16 @@ const ModalCompany = (props: IProps) => {
                                     labelCol={{ span: 24 }}
                                     label="Ảnh Logo"
                                     name="logo"
-                                    rules={[{
-                                        required: true,
-                                        message: 'Vui lòng không bỏ trống',
-                                        validator: () => {
-                                            if (dataLogo.length > 0) return Promise.resolve();
-                                            else return Promise.reject(false);
+                                    rules={[
+                                        {
+                                            validator: () => {
+                                                // Cho phép dùng logo hiện có khi update; chỉ yêu cầu khi tạo mới
+                                                if (dataInit?._id) return Promise.resolve();
+                                                if (dataLogo.length > 0) return Promise.resolve();
+                                                return Promise.reject(new Error('Vui lòng upload ảnh Logo'));
+                                            }
                                         }
-                                    }]}
+                                    ]}
                                 >
                                     <ConfigProvider locale={enUS}>
                                         <Upload
@@ -232,7 +279,7 @@ const ModalCompany = (props: IProps) => {
                                             multiple={false}
                                             customRequest={handleUploadFileLogo}
                                             beforeUpload={beforeUpload}
-                                            onChange={handleChange}
+                                            onChange={handleChangeLogo}
                                             onRemove={(file) => handleRemoveFile(file)}
                                             onPreview={handlePreview}
                                             defaultFileList={
@@ -249,7 +296,7 @@ const ModalCompany = (props: IProps) => {
 
                                         >
                                             <div>
-                                                {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
+                                                {loadingLogo ? <LoadingOutlined /> : <PlusOutlined />}
                                                 <div style={{ marginTop: 8 }}>Upload</div>
                                             </div>
                                         </Upload>
@@ -285,6 +332,75 @@ const ModalCompany = (props: IProps) => {
                                         value={value}
                                         onChange={setValue}
                                     />
+                                </Col>
+                            </ProCard>
+                            <ProCard
+                                title="Hình ảnh công ty"
+                                headStyle={{ color: '#d81921' }}
+                                style={{ marginBottom: 20 }}
+                                headerBordered
+                                size="small"
+                                bordered
+                            >
+                                <Col span={24}>
+                                    <ConfigProvider locale={enUS}>
+                                        <Upload
+                                            name="images"
+                                            listType="picture-card"
+                                            className="avatar-uploader"
+                                            multiple
+                                            customRequest={handleUploadFileImages}
+                                            beforeUpload={beforeUpload}
+                                            onChange={handleChangeImages}
+                                            onRemove={(file) => handleRemoveImage(file)}
+                                            fileList={dataImages.map(i => ({
+                                                uid: i.uid,
+                                                name: i.name,
+                                                status: 'done',
+                                                url: `${import.meta.env.VITE_BACKEND_URL}/images/company/${i.name}`,
+                                            }))}
+                                        >
+                                            <div>
+                                                {loadingImages ? <LoadingOutlined /> : <PlusOutlined />}
+                                                <div style={{ marginTop: 8 }}>Upload</div>
+                                            </div>
+                                        </Upload>
+                                    </ConfigProvider>
+                                </Col>
+                            </ProCard>
+                            <ProCard
+                                title="Bản đồ (iframe)"
+                                headStyle={{ color: '#d81921' }}
+                                style={{ marginBottom: 20 }}
+                                headerBordered
+                                size="small"
+                                bordered
+                            >
+                                <Col span={24}>
+                                    <Row gutter={[8, 8]}>
+                                        {dataMaps.map((m, idx) => (
+                                            <Col span={24} key={m.uid}>
+                                                <Form.Item labelCol={{ span: 24 }} label={`Iframe #${idx + 1}`}>
+                                                    <ProFormTextArea
+                                                        name={`map_${m.uid}`}
+                                                        placeholder="Dán mã iframe Google Maps tại đây"
+                                                        fieldProps={{
+                                                            value: m.value,
+                                                            onChange: (e: any) => {
+                                                                const val = e?.target?.value ?? '';
+                                                                setDataMaps(prev => prev.map(x => x.uid === m.uid ? { ...x, value: val } : x));
+                                                            },
+                                                            autoSize: { minRows: 3, maxRows: 8 }
+                                                        }}
+                                                    />
+                                                    <a onClick={() => setDataMaps(prev => prev.filter(x => x.uid !== m.uid))}>Xóa</a>
+                                                </Form.Item>
+                                            </Col>
+                                        ))}
+                                        <Col span={24}>
+                                            <a onClick={() => setDataMaps(prev => ([...prev, { uid: uuidv4(), value: '' }]))}><PlusOutlined /> Thêm iframe</a>
+                                        </Col>
+                                    </Row>
                                 </Col>
                             </ProCard>
                         </Row>

@@ -1,4 +1,7 @@
+import './config/dayjs';
 import { useEffect, useRef, useState } from 'react';
+import { ConfigProvider } from 'antd';
+import viVN from 'antd/locale/vi_VN';
 import {
   createBrowserRouter,
   Outlet,
@@ -31,6 +34,7 @@ import ClientJobSearchPage from './pages/job/search';
 import ClientJobDetailPage from './pages/job/detail';
 import ClientCompanyPage from './pages/company';
 import ClientCompanyDetailPage from './pages/company/detail';
+// dayjs config is imported globally via './config/dayjs'
 
 const LayoutClient = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -162,7 +166,9 @@ export default function App() {
 
   return (
     <>
-      <RouterProvider router={router} />
+      <ConfigProvider locale={viVN}>
+        <RouterProvider router={router} />
+      </ConfigProvider>
     </>
   )
 }

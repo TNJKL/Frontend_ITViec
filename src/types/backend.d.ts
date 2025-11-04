@@ -42,6 +42,8 @@ export interface ICompany {
     name?: string;
     address?: string;
     logo: string;
+    images?: string[];
+    maps?: string[];
     description?: string;
     createdBy?: string;
     isDeleted?: boolean;
@@ -84,7 +86,8 @@ export interface IJob {
     company?: {
         _id: string;
         name: string;
-        logo?: string;
+  logo?: string;
+  images?: string[];
     }
     location: string;
     workingModel?: string;

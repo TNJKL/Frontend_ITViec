@@ -49,12 +49,12 @@ export const callUploadSingleFile = (file: any, folderType: string) => {
  * 
 Module Company
  */
-export const callCreateCompany = (name: string, address: string, description: string, logo: string) => {
-    return axios.post<IBackendRes<ICompany>>('/api/v1/companies', { name, address, description, logo })
+export const callCreateCompany = (name: string, address: string, description: string, logo: string, images?: string[], maps?: string[]) => {
+    return axios.post<IBackendRes<ICompany>>('/api/v1/companies', { name, address, description, logo, images, maps })
 }
 
-export const callUpdateCompany = (id: string, name: string, address: string, description: string, logo: string) => {
-    return axios.patch<IBackendRes<ICompany>>(`/api/v1/companies/${id}`, { name, address, description, logo })
+export const callUpdateCompany = (id: string, name: string, address: string, description: string, logo: string, images?: string[], maps?: string[]) => {
+    return axios.patch<IBackendRes<ICompany>>(`/api/v1/companies/${id}`, { name, address, description, logo, images, maps })
 }
 
 export const callDeleteCompany = (id: string) => {
@@ -67,6 +67,19 @@ export const callFetchCompany = (query: string) => {
 
 export const callFetchCompanyById = (id: string) => {
     return axios.get<IBackendRes<ICompany>>(`/api/v1/companies/${id}`);
+}
+
+// Reviews
+export const callFetchReviewsByCompany = (companyId: string) => {
+    return axios.get<IBackendRes<any>>(`/api/v1/reviews?companyId=${companyId}`);
+}
+
+export const callCreateReview = (payload: { company: string; user: string; rating: number; comment?: string; summary?: string; pros?: string; cons?: string; recommend?: boolean }) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/reviews`, payload);
+}
+
+export const callFetchReviewSummary = (companyId: string) => {
+    return axios.get<IBackendRes<any>>(`/api/v1/reviews/summary?companyId=${companyId}`);
 }
 
 

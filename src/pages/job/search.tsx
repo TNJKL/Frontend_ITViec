@@ -8,9 +8,10 @@ import { Button, Col, Empty, Row, Select, Skeleton, Tag } from 'antd';
 import { EnvironmentOutlined, DollarOutlined, HistoryOutlined, MonitorOutlined, UserOutlined } from '@ant-design/icons';
 import { getLocationName, SKILLS_LIST, LOCATION_LIST } from '@/config/utils';
 import parse from 'html-react-parser';
-import dayjs from 'dayjs';
+import dayjs from '@/config/dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime)
+import ApplyModal from '@/components/client/modal/apply.modal';
 
 const JobSearchPage = () => {
   const locationRouter = useLocation();
@@ -33,6 +34,7 @@ const JobSearchPage = () => {
   const [salaryRange, setSalaryRange] = useState<string | null>(
     initialSalaryMin && initialSalaryMax ? `${initialSalaryMin}-${initialSalaryMax}` : null
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const buildFilterQueryFromUrl = (searchStr?: string) => {
     const filters: string[] = [];
@@ -55,21 +57,26 @@ const JobSearchPage = () => {
 
   const fetchList = async (searchStr?: string) => {
     setIsLoading(true);
-    let query = `current=1&pageSize=100&${buildFilterQueryFromUrl(searchStr)}&sort=-updatedAt`;
-    const res = await callFetchJob(query);
-    if (res?.data) {
-      const result = res.data.result as IJob[];
-      setJobs(result);
-      if (result && result.length > 0) {
-        // nếu selectedJob không còn trong danh sách, chọn job đầu tiên
-        const stillExists = selectedJob && result.some(j => j._id === selectedJob._id);
-        if (!stillExists) setSelectedJob(result[0]);
-      } else {
-        // không có job phù hợp thì ẩn panel chi tiết
-        setSelectedJob(null);
+    try {
+      let query = `current=1&pageSize=100&${buildFilterQueryFromUrl(searchStr)}&sort=-updatedAt`;
+      const res = await callFetchJob(query);
+      if (res?.data) {
+        const result = res.data.result as IJob[];
+        setJobs(result);
+        if (result && result.length > 0) {
+          // nếu selectedJob không còn trong danh sách, chọn job đầu tiên
+          const stillExists = selectedJob && result.some(j => j._id === selectedJob._id);
+          if (!stillExists) setSelectedJob(result[0]);
+        } else {
+          // không có job phù hợp thì ẩn panel chi tiết
+          setSelectedJob(null);
+        }
       }
+    } catch (e) {
+      // noop
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   useEffect(() => {
@@ -87,7 +94,7 @@ const JobSearchPage = () => {
   }, [locationRouter.search]);
 
   const handleApply = () => {
-    // mở modal apply nếu có sẵn trong dự án, giữ chỗ
+    setIsModalOpen(true);
   }
 
   // bỏ phần mô tả tóm tắt theo yêu cầu
@@ -219,10 +226,10 @@ const JobSearchPage = () => {
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600 }}>{j.name}</div>
-                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 6 }}>
-                          <div><EnvironmentOutlined style={{ color: '#58aaab' }} /> {getLocationName(j.location)}</div>
-                          <div><DollarOutlined /> {(j.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</div>
-                          <div style={{ color: '#888' }}>{dayjs(j.updatedAt).fromNow()}</div>
+                        <div style={{ marginTop: 8, background: '#fafafa', padding: '8px 10px', borderRadius: 6 }}>
+                          <div style={{ marginBottom: 6 }}><EnvironmentOutlined style={{ color: '#58aaab' }} /> {getLocationName(j.location)}</div>
+                          <div style={{ marginBottom: 6 }}><DollarOutlined /> {(j.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</div>
+                          <div style={{ color: '#888' }}><HistoryOutlined /> {dayjs(j.updatedAt).fromNow()}</div>
                         </div>
                         {j.workingModel && (
                           <div style={{ marginTop: 6 }}>
@@ -280,6 +287,7 @@ const JobSearchPage = () => {
           )}
         </Col>
       </Row>
+      <ApplyModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} jobDetail={selectedJob} />
     </div>
   )
 }

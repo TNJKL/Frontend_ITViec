@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, message, notification } from "antd";
+import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, Tag, message, notification } from "antd";
 import { isMobile } from "react-device-detect";
 import type { TabsProps } from 'antd';
 import { IResume, IUser } from "@/types/backend";
@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { callFetchResumeByUser, callGetSubscriberSkills, callUpdateSubscriber, callFetchUserById, callUpdateSelfUser, callChangeSelfPassword } from "@/config/api";
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import { MonitorOutlined } from "@ant-design/icons";
+import { MonitorOutlined, EyeOutlined } from "@ant-design/icons";
 import { SKILLS_LIST } from "@/config/utils";
 import { useAppSelector } from "@/redux/hooks";
 // company hiển thị read-only, không dùng DebounceSelect
@@ -31,6 +31,21 @@ const UserResume = (props: any) => {
         }
         init();
     }, [])
+
+    const renderStatus = (status?: string) => {
+        const map: Record<string, { color: string; text: string }> = {
+            PENDING: { color: 'gold', text: 'Pending' },
+            REVIEWING: { color: 'blue', text: 'Reviewing' },
+            APPROVED: { color: 'green', text: 'Approved' },
+            REJECTED: { color: 'red', text: 'Rejected' },
+        };
+        const key = (status || '').toUpperCase();
+        const cfg = map[key] || { color: 'default', text: status || '-' };
+        return <Tag color={cfg.color}>{cfg.text}</Tag>
+    }
+
+    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
     const columns: ColumnsType<IResume> = [
         {
@@ -58,6 +73,7 @@ const UserResume = (props: any) => {
         {
             title: 'Trạng thái',
             dataIndex: "status",
+            render: (value) => renderStatus(value as any)
         },
         {
             title: 'Ngày rải CV',
@@ -69,16 +85,30 @@ const UserResume = (props: any) => {
             },
         },
         {
-            title: '',
-            dataIndex: "",
-            render(value, record, index) {
+            title: 'Xem',
+            dataIndex: "preview",
+            width: 80,
+            align: 'center',
+            render: (_, record) => {
+                const url = `${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`;
                 return (
-                    <a
-                        href={`${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`}
-                        target="_blank"
-                    >Chi tiết</a>
+                    <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={() => { setPreviewUrl(url); setIsPreviewOpen(true); }}
+                    />
                 )
-            },
+            }
+        },
+        {
+            title: 'Chi tiết',
+            dataIndex: "detail",
+            render: (_, record) => (
+                <a
+                    href={`${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`}
+                    target="_blank"
+                >Chi tiết</a>
+            )
         },
     ];
 
@@ -90,6 +120,17 @@ const UserResume = (props: any) => {
                 loading={isFetching}
                 pagination={false}
             />
+            <Modal
+                title="Preview CV"
+                open={isPreviewOpen}
+                onCancel={() => setIsPreviewOpen(false)}
+                footer={null}
+                width={900}
+                bodyStyle={{ height: 600, padding: 0 }}
+                destroyOnClose
+            >
+                <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 0 }} />
+            </Modal>
         </div>
     )
 }
