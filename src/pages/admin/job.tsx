@@ -20,6 +20,7 @@ const JobPage = () => {
     const meta = useAppSelector(state => state.job.meta);
     const jobs = useAppSelector(state => state.job.result);
     const dispatch = useAppDispatch();
+    const accountUser = useAppSelector(state => state.account.user);
     const navigate = useNavigate();
 
     const handleDeleteJob = async (_id: string | undefined) => {
@@ -223,7 +224,9 @@ const JobPage = () => {
                     dataSource={jobs}
                     request={async (params, sort, filter): Promise<any> => {
                         const query = buildQuery(params, sort, filter);
-                        dispatch(fetchJob({ query }))
+                        const roleName = accountUser?.role?.name;
+                        const managed = roleName === 'EMPLOYER' || roleName === 'HR' || roleName === 'ADMIN' || roleName === 'SUPER_ADMIN';
+                        dispatch(fetchJob({ query, managed }))
                     }}
                     scroll={{ x: true }}
                     pagination={

@@ -21,6 +21,7 @@ const ResumePage = () => {
     const meta = useAppSelector(state => state.resume.meta);
     const resumes = useAppSelector(state => state.resume.result);
     const dispatch = useAppDispatch();
+    const accountUser = useAppSelector(state => state.account.user);
 
     const [dataInit, setDataInit] = useState<IResume | null>(null);
     const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
@@ -204,7 +205,9 @@ const ResumePage = () => {
                     dataSource={resumes}
                     request={async (params, sort, filter): Promise<any> => {
                         const query = buildQuery(params, sort, filter);
-                        dispatch(fetchResume({ query }))
+                        const roleName = accountUser?.role?.name;
+                        const managed = roleName === 'EMPLOYER' || roleName === 'HR' || roleName === 'ADMIN' || roleName === 'SUPER_ADMIN';
+                        dispatch(fetchResume({ query, managed }))
                     }}
                     scroll={{ x: true }}
                     pagination={

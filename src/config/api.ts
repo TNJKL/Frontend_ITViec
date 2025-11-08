@@ -65,6 +65,10 @@ export const callFetchCompany = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<ICompany>>>(`/api/v1/companies?${query}`);
 }
 
+export const callFetchCompanyManaged = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICompany>>>(`/api/v1/companies/manage?${query}`);
+}
+
 export const callFetchCompanyById = (id: string) => {
     return axios.get<IBackendRes<ICompany>>(`/api/v1/companies/${id}`);
 }
@@ -135,6 +139,10 @@ export const callFetchJob = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IJob>>>(`/api/v1/jobs?${query}`);
 }
 
+export const callFetchJobManaged = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IJob>>>(`/api/v1/jobs/manage?${query}`);
+}
+
 export const callFetchJobById = (id: string) => {
     return axios.get<IBackendRes<IJob>>(`/api/v1/jobs/${id}`);
 }
@@ -157,6 +165,10 @@ export const callDeleteResume = (id: string) => {
 
 export const callFetchResume = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IResume>>>(`/api/v1/resumes?${query}`);
+}
+
+export const callFetchResumeManaged = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IResume>>>(`/api/v1/resumes/manage?${query}`);
 }
 
 export const callFetchResumeById = (id: string) => {

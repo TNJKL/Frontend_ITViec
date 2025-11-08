@@ -1,0 +1,129 @@
+.cv-preview-page {
+  background: #f5f5f5;
+  min-height: calc(100vh - 200px);
+  padding: 20px;
+
+  .cv-preview-header {
+    max-width: 1600px;
+    margin: 0 auto 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+  }
+
+  .cv-preview-content {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    gap: 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .cv-preview-left {
+    width: 250px;
+    flex-shrink: 0;
+
+    .cv-template-selector,
+    .cv-color-selector,
+    .cv-language-selector {
+      margin-bottom: 30px;
+
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+      }
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #5B3A2B;
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  .cv-preview-right {
+    flex: 1;
+    overflow: auto;
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 800px;
+
+    .cv-preview-wrapper {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: scale(0.8);
+      transform-origin: top center;
+      width: 210mm;
+    }
+  }
+
+  .cv-preview-footer {
+    max-width: 1600px;
+    margin: 20px auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    .color-swatch-small {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ddd;
+      transition: all 0.3s;
+
+      &:hover {
+        border-color: #5B3A2B;
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+@media print {
+  .cv-preview-page {
+    .cv-preview-header,
+    .cv-preview-left,
+    .cv-preview-footer {
+      display: none;
+    }
+
+    .cv-preview-right {
+      .cv-preview-wrapper {
+        transform: scale(1);
+      }
+    }
+  }
+}
+

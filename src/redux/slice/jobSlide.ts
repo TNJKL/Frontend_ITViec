@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { callFetchJob } from '@/config/api';
+import { callFetchJob, callFetchJobManaged } from '@/config/api';
 import { IJob } from '@/types/backend';
 
 interface IState {
@@ -15,8 +15,8 @@ interface IState {
 // First, create the thunk
 export const fetchJob = createAsyncThunk(
     'job/fetchJob',
-    async ({ query }: { query: string }) => {
-        const response = await callFetchJob(query);
+    async ({ query, managed }: { query: string, managed?: boolean }) => {
+        const response = managed ? await callFetchJobManaged(query) : await callFetchJob(query);
         return response;
     }
 )

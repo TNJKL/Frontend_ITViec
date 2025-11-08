@@ -1,0 +1,74 @@
+.cv-templates-page {
+  padding: 40px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f5f5f5;
+  min-height: calc(100vh - 200px);
+
+  .cv-templates-header {
+    text-align: center;
+    margin-bottom: 40px;
+
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #666;
+    }
+  }
+
+  .cv-templates-container {
+    .cv-template-card {
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+
+      &:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        transform: translateY(-4px);
+      }
+
+      &.selected {
+        border-color: #5B3A2B;
+        box-shadow: 0 8px 24px rgba(91, 58, 43, 0.3);
+      }
+
+      .cv-template-preview {
+        background: #f0f0f0;
+        padding: 10px;
+        height: 480px;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        position: relative;
+
+        .cv-template-preview-wrapper {
+          transform: scale(0.42);
+          transform-origin: center top;
+          width: 210mm;
+          min-height: 297mm;
+          overflow: visible;
+          pointer-events: none;
+          position: relative;
+          top: 0;
+          left: 0;
+          
+          // Ensure all templates render correctly
+          .cv-template {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -5,18 +5,24 @@ import Loading from "../loading";
 
 const RoleBaseRoute = (props: any) => {
     const user = useAppSelector(state => state.account.user);
-    const userRole = user.role.name;
+    const userRole = user?.role?.name;
 
-    if (userRole !== 'NORMAL_USER') {
+    if (!userRole || userRole !== 'NORMAL_USER') {
         return (<>{props.children}</>)
     } else {
         return (<NotPermitted />)
     }
 }
 
-const ProtectedRoute = (props: any) => {
+interface IProtectedRouteProps {
+    children: React.ReactNode;
+    allowNormalUser?: boolean; // Cho phép NORMAL_USER truy cập (dùng cho account management)
+}
+
+const ProtectedRoute = (props: IProtectedRouteProps) => {
     const isAuthenticated = useAppSelector(state => state.account.isAuthenticated)
     const isLoading = useAppSelector(state => state.account.isLoading)
+    const { allowNormalUser = false } = props;
 
     return (
         <>
@@ -26,9 +32,13 @@ const ProtectedRoute = (props: any) => {
                 <>
                     {isAuthenticated === true ?
                         <>
-                            <RoleBaseRoute>
-                                {props.children}
-                            </RoleBaseRoute>
+                            {allowNormalUser ? (
+                                <>{props.children}</>
+                            ) : (
+                                <RoleBaseRoute>
+                                    {props.children}
+                                </RoleBaseRoute>
+                            )}
                         </>
                         :
                         <Navigate to='/login' replace />

@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import ManageAccount from './modal/manage.account';
+// import ManageAccount from './modal/manage.account';
 
 const Header = (props: any) => {
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Header = (props: any) => {
     const [current, setCurrent] = useState('home');
     const location = useLocation();
 
-    const [openMangeAccount, setOpenManageAccount] = useState<boolean>(false);
+    // const [openMangeAccount, setOpenManageAccount] = useState<boolean>(false);
 
     useEffect(() => {
         setCurrent(location.pathname);
@@ -64,10 +64,7 @@ const Header = (props: any) => {
 
     const itemsDropdown = [
         {
-            label: <label
-                style={{ cursor: 'pointer' }}
-                onClick={() => setOpenManageAccount(true)}
-            >Quản lý tài khoản</label>,
+            label: <Link to={'/account/manage'}>Quản lý tài khoản</Link>,
             key: 'manage-account',
             icon: <ContactsOutlined />
         },
@@ -153,10 +150,7 @@ const Header = (props: any) => {
                     items={itemsMobiles}
                 />
             </Drawer>
-            <ManageAccount
-                open={openMangeAccount}
-                onClose={setOpenManageAccount}
-            />
+            {/* ManageAccount modal deprecated; now using dedicated page */}
         </>
     )
 };

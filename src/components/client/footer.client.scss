@@ -1,0 +1,170 @@
+.footer-container {
+  width: 100%;
+  position: relative;
+  margin-top: 80px;
+  background: #222831;
+  color: #a7a7a7;
+  padding: 18px 0 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: #222831;
+    pointer-events: none;
+  }
+
+  .footer-content {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 10px 15px 16px 15px;
+
+    @media (max-width: 768px) {
+      padding: 20px 15px 15px 15px;
+    }
+  }
+
+  .footer-logo-section {
+    .footer-logo {
+      margin-bottom: 8px;
+
+      .logo-text {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .logo-tagline {
+      color: #a7a7a7;
+      font-size: 12px;
+      margin: 0 0 12px 0;
+      font-style: italic;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+
+      .social-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #a7a7a7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a7a7a7;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+
+        &:hover {
+          background: #1677ff;
+          border-color: #1677ff;
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .nav-title {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 8px;
+
+      a {
+        color: #a7a7a7;
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.3s ease;
+        display: inline-block;
+
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #a7a7a7;
+      font-size: 13px;
+
+      .contact-icon {
+        font-size: 14px;
+        color: #a7a7a7;
+        min-width: 16px;
+      }
+
+      span {
+        color: #a7a7a7;
+        line-height: 1.5;
+
+        strong {
+          color: #fff;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .footer-bottom {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+
+    p {
+      color: #a7a7a7;
+      font-size: 12px;
+      margin: 0;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .footer-container {
+    .footer-content {
+      .footer-logo-section {
+        margin-bottom: 20px;
+        text-align: center;
+
+        .social-icons {
+          justify-content: center;
+        }
+      }
+
+      .nav-title {
+        margin-top: 20px;
+      }
+    }
+  }
+}

@@ -34,6 +34,9 @@ import ClientJobSearchPage from './pages/job/search';
 import ClientJobDetailPage from './pages/job/detail';
 import ClientCompanyPage from './pages/company';
 import ClientCompanyDetailPage from './pages/company/detail';
+import ManageAccountPage from './pages/account/manage';
+import CVTemplatesPage from './pages/cv/templates';
+import CVPreviewPage from './pages/cv/preview';
 // dayjs config is imported globally via './config/dayjs'
 
 const LayoutClient = () => {
@@ -84,8 +87,19 @@ export default function App() {
         { path: "job/search", element: <ClientJobSearchPage /> },
         { path: "job/:id", element: <ClientJobDetailPage /> },
         { path: "company", element: <ClientCompanyPage /> },
-        { path: "company/:id", element: <ClientCompanyDetailPage /> }
+        { path: "company/:id", element: <ClientCompanyDetailPage /> },
+        { path: "cv/templates", element: <CVTemplatesPage /> },
+        { path: "cv/preview", element: <ProtectedRoute allowNormalUser={true}><CVPreviewPage /></ProtectedRoute> }
       ],
+    },
+
+    {
+      path: "/account",
+      element: (<LayoutApp><LayoutClient /></LayoutApp>),
+      errorElement: <NotFound />,
+      children: [
+        { path: "manage", element: <ProtectedRoute allowNormalUser={true}><ManageAccountPage /></ProtectedRoute> }
+      ]
     },
 
     {

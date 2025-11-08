@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { callFetchCompany } from '@/config/api';
+import { callFetchCompany, callFetchCompanyManaged } from '@/config/api';
 import { ICompany } from '@/types/backend';
 
 interface IState {
@@ -15,8 +15,8 @@ interface IState {
 // First, create the thunk
 export const fetchCompany = createAsyncThunk(
     'company/fetchCompany',
-    async ({ query }: { query: string }) => {
-        const response = await callFetchCompany(query);
+    async ({ query, managed }: { query: string, managed?: boolean }) => {
+        const response = managed ? await callFetchCompanyManaged(query) : await callFetchCompany(query);
         return response;
     }
 )

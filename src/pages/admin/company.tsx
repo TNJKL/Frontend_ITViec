@@ -23,6 +23,7 @@ const CompanyPage = () => {
     const meta = useAppSelector(state => state.company.meta);
     const companies = useAppSelector(state => state.company.result);
     const dispatch = useAppDispatch();
+    const accountUser = useAppSelector(state => state.account.user);
 
     const handleDeleteCompany = async (_id: string | undefined) => {
         if (_id) {
@@ -203,7 +204,9 @@ const CompanyPage = () => {
                     dataSource={companies}
                     request={async (params, sort, filter): Promise<any> => {
                         const query = buildQuery(params, sort, filter);
-                        dispatch(fetchCompany({ query }))
+                        const roleName = accountUser?.role?.name;
+                        const managed = roleName === 'EMPLOYER' || roleName === 'HR' || roleName === 'ADMIN' || roleName === 'SUPER_ADMIN';
+                        dispatch(fetchCompany({ query, managed }))
                     }}
                     scroll={{ x: true }}
                     pagination={
