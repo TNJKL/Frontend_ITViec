@@ -181,6 +181,14 @@ export interface IResume {
     updatedAt?: string;
 }
 
+export interface IResumeCheck {
+    applied: boolean;
+    resumeId?: string;
+    appliedAt?: string;
+    status?: string;
+    url?: string;
+}
+
 export interface IPermission {
     _id?: string;
     name?: string;
@@ -220,4 +228,69 @@ export interface ISubscribers {
     deletedAt?: boolean | null;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface IDashboardOverview {
+    totals: {
+        users: {
+            total: number;
+            byRole: {
+                total: number;
+                candidate: number;
+                hr: number;
+                admin: number;
+                others: Array<{
+                    roleId?: string;
+                    roleName?: string;
+                    count: number;
+                }>;
+            };
+        };
+        jobs: {
+            total: number;
+            active: number;
+        };
+        applications: {
+            total: number;
+            today: number;
+            thisMonth: number;
+            uniqueApplicantsThisMonth: number;
+        };
+        companies: number;
+    };
+    trends: {
+        applicationsLast7Days: Array<{
+            date: string;
+            count: number;
+        }>;
+        jobsLast6Months: Array<{
+            month: string;
+            count: number;
+        }>;
+    };
+    leaderboards: {
+        topCandidates: Array<{
+            userId?: string;
+            name?: string;
+            email?: string;
+            phone?: string;
+            avatar?: string;
+            company?: string;
+            totalApplications: number;
+            jobsCount: number;
+            companiesCount: number;
+            lastAppliedAt?: string;
+        }>;
+        topHRs: Array<{
+            userId?: string;
+            name?: string;
+            email?: string;
+            phone?: string;
+            avatar?: string;
+            company?: string;
+            companyNames?: string[];
+            totalJobs: number;
+            lastPostedAt?: string;
+        }>;
+    };
 }

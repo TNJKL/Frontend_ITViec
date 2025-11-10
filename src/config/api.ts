@@ -1,4 +1,4 @@
-import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume, IPermission, IRole, ISubscribers } from '@/types/backend';
+import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume, IPermission, IRole, ISubscribers, IDashboardOverview, IResumeCheck } from '@/types/backend';
 import axios from 'config/axios-customize';
 
 /**
@@ -155,8 +155,16 @@ export const callCreateResume = (url: string, companyId: any, jobId: any) => {
     return axios.post<IBackendRes<IResume>>('/api/v1/resumes', { url, companyId, jobId })
 }
 
+export const callCheckResumeApplied = (jobId: string) => {
+    return axios.get<IBackendRes<IResumeCheck>>(`/api/v1/resumes/job/${jobId}/check`);
+}
+
 export const callUpdateResumeStatus = (id: any, status: string) => {
     return axios.patch<IBackendRes<IResume>>(`/api/v1/resumes/${id}`, { status })
+}
+
+export const callUpdateResumeFile = (id: string, url: string) => {
+    return axios.patch<IBackendRes<IResume>>(`/api/v1/resumes/${id}/file`, { url });
 }
 
 export const callDeleteResume = (id: string) => {
@@ -253,5 +261,13 @@ export const callFetchSubscriber = (query: string) => {
 
 export const callFetchSubscriberById = (id: string) => {
     return axios.get<IBackendRes<ISubscribers>>(`/api/v1/subscribers/${id}`);
+}
+
+/**
+ * 
+ * Module Dashboard
+ */
+export const callFetchDashboardOverview = () => {
+    return axios.get<IBackendRes<IDashboardOverview>>('/api/v1/dashboard/overview');
 }
 

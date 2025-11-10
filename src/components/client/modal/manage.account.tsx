@@ -1,12 +1,13 @@
-import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, Tag, message, notification } from "antd";
+import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, Tag, Upload, message, notification } from "antd";
 import { isMobile } from "react-device-detect";
 import type { TabsProps } from 'antd';
 import { IResume, IUser } from "@/types/backend";
 import { useState, useEffect } from 'react';
-import { callFetchResumeByUser, callGetSubscriberSkills, callUpdateSubscriber, callFetchUserById, callUpdateSelfUser, callChangeSelfPassword } from "@/config/api";
+import { callFetchResumeByUser, callGetSubscriberSkills, callUpdateSubscriber, callFetchUserById, callUpdateSelfUser, callChangeSelfPassword, callUploadSingleFile, callUpdateResumeFile } from "@/config/api";
 import type { ColumnsType } from 'antd/es/table';
+import type { UploadProps } from "antd";
 import dayjs from 'dayjs';
-import { MonitorOutlined, EyeOutlined } from "@ant-design/icons";
+import { MonitorOutlined, EyeOutlined, UploadOutlined } from "@ant-design/icons";
 import { SKILLS_LIST } from "@/config/utils";
 import { useAppSelector } from "@/redux/hooks";
 // company hiển thị read-only, không dùng DebounceSelect
@@ -16,21 +17,86 @@ interface IProps {
     onClose: (v: boolean) => void;
 }
 
-const UserResume = (props: any) => {
+const UserResume = () => {
     const [listCV, setListCV] = useState<IResume[]>([]);
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const [updatingResume, setUpdatingResume] = useState<IResume | null>(null);
+    const [uploading, setUploading] = useState<boolean>(false);
 
-    useEffect(() => {
-        const init = async () => {
-            setIsFetching(true);
+    const fetchResumes = async () => {
+        setIsFetching(true);
+        try {
             const res = await callFetchResumeByUser();
             if (res && res.data) {
-                setListCV(res.data as IResume[])
+                setListCV(res.data as IResume[]);
             }
+        } finally {
             setIsFetching(false);
         }
-        init();
-    }, [])
+    };
+
+    useEffect(() => {
+        fetchResumes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleOpenUpdate = (resume: IResume) => {
+        setUpdatingResume(resume);
+    };
+
+    const handleCloseUpdate = () => {
+        setUpdatingResume(null);
+    };
+
+    const getJobName = (resume: IResume | null) => {
+        if (!resume) return "";
+        const job = resume.jobId as any;
+        if (typeof job === "string") return job;
+        return job?.name ?? "";
+    };
+
+    const getCompanyName = (resume: IResume | null) => {
+        if (!resume) return "";
+        const company = resume.companyId as any;
+        if (typeof company === "string") return company;
+        return company?.name ?? "";
+    };
+
+    const updateUploadProps: UploadProps = {
+        maxCount: 1,
+        multiple: false,
+        accept: "application/pdf,application/msword, .doc, .docx, .pdf",
+        showUploadList: false,
+        disabled: uploading,
+        async customRequest({ file, onSuccess, onError }: any) {
+            if (!updatingResume?._id) {
+                if (onError) onError({ event: new Error("Không tìm thấy hồ sơ cần cập nhật") });
+                return;
+            }
+            setUploading(true);
+            try {
+                const uploadRes = await callUploadSingleFile(file, "resume");
+                if (uploadRes?.data?.fileName) {
+                    const updateRes = await callUpdateResumeFile(updatingResume._id, uploadRes.data.fileName);
+                    if (updateRes?.data) {
+                        message.success("Cập nhật CV thành công");
+                        await fetchResumes();
+                        handleCloseUpdate();
+                        if (onSuccess) onSuccess('ok');
+                    } else {
+                        throw new Error(updateRes?.message ?? "Không thể cập nhật CV");
+                    }
+                } else {
+                    throw new Error(uploadRes?.message ?? "Không thể upload file");
+                }
+            } catch (error: any) {
+                message.error(error?.message ?? "Đã có lỗi xảy ra khi cập nhật CV");
+                if (onError) onError({ event: error });
+            } finally {
+                setUploading(false);
+            }
+        }
+    };
 
     const renderStatus = (status?: string) => {
         const map: Record<string, { color: string; text: string }> = {
@@ -51,8 +117,9 @@ const UserResume = (props: any) => {
         {
             title: 'STT',
             key: 'index',
-            width: 50,
+            width: 60,
             align: "center",
+            fixed: 'left' as const,
             render: (text, record, index) => {
                 return (
                     <>
@@ -63,37 +130,41 @@ const UserResume = (props: any) => {
         {
             title: 'Công Ty',
             dataIndex: ["companyId", "name"],
-
+            ellipsis: true,
         },
         {
             title: 'Vị trí',
             dataIndex: ["jobId", "name"],
-
+            ellipsis: true,
         },
         {
             title: 'Trạng thái',
             dataIndex: "status",
+            width: 100,
+            align: 'center',
             render: (value) => renderStatus(value as any)
         },
         {
             title: 'Ngày rải CV',
             dataIndex: "createdAt",
+            width: 140,
             render(value, record, index) {
                 return (
-                    <>{dayjs(record.createdAt).format('DD-MM-YYYY HH:mm:ss')}</>
+                    <span style={{ fontSize: '12px' }}>{dayjs(record.createdAt).format('DD-MM-YYYY HH:mm')}</span>
                 )
             },
         },
         {
             title: 'Xem',
             dataIndex: "preview",
-            width: 80,
+            width: 50,
             align: 'center',
             render: (_, record) => {
                 const url = `${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`;
                 return (
                     <Button
                         type="text"
+                        size="small"
                         icon={<EyeOutlined />}
                         onClick={() => { setPreviewUrl(url); setIsPreviewOpen(true); }}
                     />
@@ -103,23 +174,72 @@ const UserResume = (props: any) => {
         {
             title: 'Chi tiết',
             dataIndex: "detail",
+            width: 70,
+            align: 'center',
             render: (_, record) => (
                 <a
                     href={`${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`}
                     target="_blank"
+                    style={{ fontSize: '12px' }}
                 >Chi tiết</a>
             )
+        },
+        {
+            title: 'Cập nhật CV',
+            key: 'updateCV',
+            align: 'center',
+            width: 120,
+            render: (_: any, record: IResume) => {
+                return (
+                    <Button
+                        type="primary"
+                        size="small"
+                        icon={<UploadOutlined />}
+                        onClick={() => handleOpenUpdate(record)}
+                    >
+                        Cập nhật 
+                    </Button>
+                );
+            }
         },
     ];
 
     return (
-        <div>
-            <Table<IResume>
-                columns={columns}
-                dataSource={listCV}
-                loading={isFetching}
-                pagination={false}
-            />
+        <>
+            <style>{`
+                .user-resume-table-modal .ant-table-container {
+                    overflow-x: hidden !important;
+                }
+                .user-resume-table-modal .ant-table-body {
+                    overflow-x: hidden !important;
+                }
+                .user-resume-table-modal .ant-table-body::-webkit-scrollbar {
+                    width: 6px;
+                    height: 0;
+                }
+                .user-resume-table-modal .ant-table-body::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .user-resume-table-modal .ant-table-body::-webkit-scrollbar-thumb {
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 3px;
+                }
+                .user-resume-table-modal .ant-table-body::-webkit-scrollbar-thumb:hover {
+                    background: rgba(0, 0, 0, 0.3);
+                }
+            `}</style>
+            <div className="user-resume-table-modal" style={{ width: '100%' }}>
+                <Table<IResume>
+                    columns={columns}
+                    dataSource={listCV}
+                    loading={isFetching}
+                    pagination={false}
+                    scroll={{ y: 400 }}
+                    rowKey={(record) => record._id || `row-${Math.random()}`}
+                    size="small"
+                    bordered
+                />
+            </div>
             <Modal
                 title="Preview CV"
                 open={isPreviewOpen}
@@ -131,7 +251,27 @@ const UserResume = (props: any) => {
             >
                 <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 0 }} />
             </Modal>
-        </div>
+            <Modal
+                title="Cập nhật CV đã gửi"
+                open={!!updatingResume}
+                onCancel={handleCloseUpdate}
+                footer={null}
+                maskClosable={false}
+                destroyOnClose
+            >
+                <p>
+                    Bạn đang cập nhật CV cho công việc <b>{getJobName(updatingResume)}</b> tại <b>{getCompanyName(updatingResume)}</b>.
+                </p>
+                <Upload {...updateUploadProps}>
+                    <Button icon={<UploadOutlined />} loading={uploading}>
+                        {uploading ? "Đang cập nhật..." : "Tải CV mới"}
+                    </Button>
+                </Upload>
+                <p style={{ marginTop: 12, color: '#888' }}>
+                    Hỗ trợ định dạng *.doc, *.docx, *.pdf (dưới 5MB).
+                </p>
+            </Modal>
+        </>
     )
 }
 
@@ -432,14 +572,15 @@ const ManageAccount = (props: IProps) => {
                 maskClosable={false}
                 footer={null}
                 destroyOnClose={true}
-                width={isMobile ? "100%" : "1000px"}
+                width={isMobile ? "100%" : "1200px"}
             >
 
-                <div style={{ minHeight: 400 }}>
+                <div style={{ minHeight: 400, width: '100%' }}>
                     <Tabs
                         defaultActiveKey="user-resume"
                         items={items}
                         onChange={onChange}
+                        style={{ width: '100%' }}
                     />
                 </div>
 

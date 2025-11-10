@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { EyeOutlined, MonitorOutlined, PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAppSelector } from "@/redux/hooks";
-import { callChangeSelfPassword, callFetchResumeByUser, callFetchUserById, callGetSubscriberSkills, callUpdateSelfUser, callUpdateSubscriber, callUploadSingleFile } from "@/config/api";
+import { callChangeSelfPassword, callFetchResumeByUser, callFetchUserById, callGetSubscriberSkills, callUpdateSelfUser, callUpdateSubscriber, callUploadSingleFile, callUpdateResumeFile } from "@/config/api";
 import type { RcFile } from 'antd/es/upload';
 import { SKILLS_LIST } from "@/config/utils";
 
@@ -47,6 +47,9 @@ const UserResume = () => {
     const [isFetching, setIsFetching] = useState<boolean>(false);
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+    const [updatingResume, setUpdatingResume] = useState<IResume | null>(null);
+    const [uploading, setUploading] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
 
     useEffect(() => {
         const init = async () => {
@@ -72,36 +75,179 @@ const UserResume = () => {
         return <Tag color={cfg.color}>{cfg.text}</Tag>
     }
 
+    const handleOpenUpdate = (resume: IResume) => {
+        setUpdatingResume(resume);
+        setSelectedFile(null);
+    };
+
+    const handleCloseUpdate = () => {
+        setUpdatingResume(null);
+        setSelectedFile(null);
+    };
+
+    const getJobName = (resume: IResume | null) => {
+        if (!resume) return "";
+        const job = resume.jobId as any;
+        if (typeof job === "string") return job;
+        return job?.name ?? "";
+    };
+
+    const getCompanyName = (resume: IResume | null) => {
+        if (!resume) return "";
+        const company = resume.companyId as any;
+        if (typeof company === "string") return company;
+        return company?.name ?? "";
+    };
+
+    const updateUploadProps: UploadProps = {
+        maxCount: 1,
+        multiple: false,
+        accept: "application/pdf,application/msword, .doc, .docx, .pdf",
+        showUploadList: true,
+        disabled: uploading,
+        beforeUpload: (file) => {
+            setSelectedFile(file as RcFile);
+            return false; // Ngăn không cho upload tự động
+        },
+        onRemove: () => {
+            setSelectedFile(null);
+        }
+    };
+
+    const handleSubmitUpdate = async () => {
+        if (!updatingResume?._id) {
+            message.error("Không tìm thấy hồ sơ cần cập nhật");
+            return;
+        }
+        if (!selectedFile) {
+            message.error("Vui lòng chọn file CV để cập nhật");
+            return;
+        }
+        setUploading(true);
+        try {
+            const uploadRes = await callUploadSingleFile(selectedFile, "resume");
+            if (uploadRes?.data?.fileName) {
+                const updateRes = await callUpdateResumeFile(updatingResume._id, uploadRes.data.fileName);
+                if (updateRes?.data) {
+                    message.success("Cập nhật CV thành công");
+                    const res = await callFetchResumeByUser();
+                    if (res && res.data) {
+                        setListCV(res.data as IResume[]);
+                    }
+                    handleCloseUpdate();
+                } else {
+                    throw new Error(updateRes?.message ?? "Không thể cập nhật CV");
+                }
+            } else {
+                throw new Error(uploadRes?.message ?? "Không thể upload file");
+            }
+        } catch (error: any) {
+            message.error(error?.message ?? "Đã có lỗi xảy ra khi cập nhật CV");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const columns: any = [
-        { title: 'STT', key: 'index', width: 70, align: 'center', render: (_: any, __: any, index: number) => <>{index + 1}</> },
+        { title: 'STT', key: 'index', width: 60, align: 'center', render: (_: any, __: any, index: number) => <>{index + 1}</> },
         { title: 'Công Ty', dataIndex: ["companyId", "name"], ellipsis: true },
         { title: 'Vị trí', dataIndex: ["jobId", "name"], ellipsis: true },
-        { title: 'Trạng thái', dataIndex: 'status', align: 'center', render: (v: string) => renderStatus(v as any) },
-        { title: 'Ngày rải CV', dataIndex: 'createdAt', ellipsis: true, render: (_: any, r: IResume) => <>{dayjs(r.createdAt).format('DD-MM-YYYY HH:mm:ss')}</> },
+        { title: 'Trạng thái', dataIndex: 'status', align: 'center', width: 100, render: (v: string) => renderStatus(v as any) },
+        { title: 'Ngày rải CV', dataIndex: 'createdAt', ellipsis: true, width: 140, render: (_: any, r: IResume) => <>{dayjs(r.createdAt).format('DD-MM-YYYY HH:mm')}</> },
         {
-            title: 'Xem', dataIndex: 'preview', align: 'center', render: (_: any, record: IResume) => {
+            title: 'Xem', dataIndex: 'preview', align: 'center', width: 50, render: (_: any, record: IResume) => {
                 const url = `${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`;
-                return <Button type="text" icon={<EyeOutlined />} onClick={() => { setPreviewUrl(url); setIsPreviewOpen(true); }} />
+                return <Button type="text" size="small" icon={<EyeOutlined />} onClick={() => { setPreviewUrl(url); setIsPreviewOpen(true); }} />
             }
         },
-        { title: 'Chi tiết', dataIndex: 'detail', align: 'center', render: (_: any, record: IResume) => <a href={`${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`} target="_blank">Chi tiết</a> }
+        { title: 'Chi tiết', dataIndex: 'detail', align: 'center', width: 70, render: (_: any, record: IResume) => <a href={`${import.meta.env.VITE_BACKEND_URL}/images/resume/${record?.url}`} target="_blank">Chi tiết</a> },
+        {
+            title: 'Cập nhật CV',
+            key: 'updateCV',
+            align: 'center',
+            width: 120,
+            render: (_: any, record: IResume) => {
+                return (
+                    <Button
+                        type="primary"
+                        size="small"
+                        icon={<UploadOutlined />}
+                        onClick={() => handleOpenUpdate(record)}
+                    >
+                        {/* Cập nhật */}
+                    </Button>
+                );
+            }
+        }
     ];
 
     return (
-        <div style={{ background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', width: '100%', margin: 0, overflowX: 'hidden' }}>
-            <Table<IResume>
-                columns={columns}
-                dataSource={listCV}
-                loading={isFetching}
-                pagination={false}
-                tableLayout="fixed"
-                scroll={{ y: 360 }}
-                style={{ width: '100%' }}
-            />
+        <>
+            <style>{`
+                .user-resume-table .ant-table-container {
+                    overflow-x: hidden !important;
+                }
+                .user-resume-table .ant-table-body {
+                    overflow-x: hidden !important;
+                }
+                .user-resume-table .ant-table-body::-webkit-scrollbar {
+                    width: 6px;
+                    height: 0;
+                }
+                .user-resume-table .ant-table-body::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .user-resume-table .ant-table-body::-webkit-scrollbar-thumb {
+                    background: rgba(0, 0, 0, 0.2);
+                    border-radius: 3px;
+                }
+                .user-resume-table .ant-table-body::-webkit-scrollbar-thumb:hover {
+                    background: rgba(0, 0, 0, 0.3);
+                }
+            `}</style>
+            <div className="user-resume-table" style={{ background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', width: '100%', margin: 0 }}>
+                <Table<IResume>
+                    columns={columns}
+                    dataSource={listCV}
+                    loading={isFetching}
+                    pagination={false}
+                    scroll={{ y: 360 }}
+                    size="small"
+                    bordered
+                />
+            </div>
             <Modal title="Preview CV" open={isPreviewOpen} onCancel={() => setIsPreviewOpen(false)} footer={null} width={900} bodyStyle={{ height: 600, padding: 0 }} destroyOnClose>
                 <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 0 }} />
             </Modal>
-        </div>
+            <Modal
+                title="Cập nhật CV đã gửi"
+                open={!!updatingResume}
+                onCancel={handleCloseUpdate}
+                onOk={handleSubmitUpdate}
+                okText="Gửi"
+                cancelText="Hủy"
+                confirmLoading={uploading}
+                maskClosable={false}
+                destroyOnClose
+            >
+                <p>
+                    Bạn đang cập nhật CV cho công việc <b>{getJobName(updatingResume)}</b> tại <b>{getCompanyName(updatingResume)}</b>.
+                </p>
+                <Upload {...updateUploadProps}>
+                    <Button icon={<UploadOutlined />} disabled={uploading}>
+                        Chọn file CV
+                    </Button>
+                </Upload>
+                {selectedFile && (
+                    <p style={{ marginTop: 12, color: '#52c41a' }}>
+                        Đã chọn: {selectedFile.name}
+                    </p>
+                )}
+                <p style={{ marginTop: 12, color: '#888' }}>
+                    Hỗ trợ định dạng *.doc, *.docx, *.pdf (dưới 5MB).
+                </p>
+            </Modal>
+        </>
     )
 }
 
