@@ -36,6 +36,19 @@ export const ALL_PERMISSIONS = {
         DELETE: { method: "DELETE", apiPath: '/api/v1/users/:id', module: "USERS" },
         GET_BY_ID: { method: "GET", apiPath: '/api/v1/users/:id', module: "USERS" },
     },
+    EMPLOYER_APPLICATIONS: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/employer-applications', module: "EMPLOYER_APPLICATIONS" },
+        APPROVE: { method: "POST", apiPath: '/api/v1/employer-applications/:id/approve', module: "EMPLOYER_APPLICATIONS" },
+        REJECT: { method: "POST", apiPath: '/api/v1/employer-applications/:id/reject', module: "EMPLOYER_APPLICATIONS" },
+    },
+    SERVICE_PACKAGES: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/service-packages', module: "SERVICE_PACKAGES" },
+        GET_ACTIVE: { method: "GET", apiPath: '/api/v1/service-packages/active', module: "SERVICE_PACKAGES" },
+        GET_BY_ID: { method: "GET", apiPath: '/api/v1/service-packages/:id', module: "SERVICE_PACKAGES" },
+        CREATE: { method: "POST", apiPath: '/api/v1/service-packages', module: "SERVICE_PACKAGES" },
+        UPDATE: { method: "PATCH", apiPath: '/api/v1/service-packages/:id', module: "SERVICE_PACKAGES" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/service-packages/:id', module: "SERVICE_PACKAGES" },
+    },
 }
 
 export const ALL_MODULES = {
@@ -50,4 +63,12 @@ export const ALL_MODULES = {
     SUBSCRIBERS: 'SUBSCRIBERS',
     REVIEWS: 'REVIEWS',
     DASHBOARD: 'DASHBOARD',
+    SERVICE_PACKAGES: 'SERVICE_PACKAGES',
+    USER_PACKAGES: 'USER_PACKAGES',
+    PAYMENTS: 'PAYMENTS',
+    INTERVIEWS: 'INTERVIEWS',
+    NOTIFICATIONS: 'NOTIFICATIONS',
+    EMPLOYER_APPLICATIONS: 'EMPLOYER_APPLICATIONS',
+    SERVICE_PACKAGES_MODULE: 'SERVICE_PACKAGES',
+    
 }

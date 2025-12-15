@@ -1,18 +1,18 @@
-import { Breadcrumb, Col, ConfigProvider, Divider, Form, Row, message, notification } from "antd";
+import { Alert, Breadcrumb, Col, ConfigProvider, Divider, Form, Row, message, notification } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DebounceSelect } from "../user/debouce.select";
 import { FooterToolbar, ProForm, ProFormDatePicker, ProFormDigit, ProFormSelect, ProFormSwitch, ProFormText } from "@ant-design/pro-components";
 import styles from 'styles/admin.module.scss';
-import { LOCATION_LIST, SKILLS_LIST } from "@/config/utils";
+import { JOB_TAG_DEFINITIONS, JOB_TAG_OPTIONS, LOCATION_LIST, SKILLS_LIST } from "@/config/utils";
 import { ICompanySelect } from "../user/modal.user";
 import { useState, useEffect } from 'react';
-import { callCreateJob, callFetchCompany, callFetchJobById, callUpdateJob } from "@/config/api";
+import { callCreateJob, callFetchCompany, callFetchJobById, callGetActiveUserPackages, callUpdateJob } from "@/config/api";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { CheckSquareOutlined } from "@ant-design/icons";
 import enUS from 'antd/lib/locale/en_US';
 import dayjs from 'dayjs';
-import { IJob } from "@/types/backend";
+import { IJob, IServicePackage } from "@/types/backend";
 
 const ViewUpsertJob = (props: any) => {
     const [companies, setCompanies] = useState<ICompanySelect[]>([]);
@@ -25,6 +25,17 @@ const ViewUpsertJob = (props: any) => {
     const id = params?.get("id"); // job id
     const [dataUpdate, setDataUpdate] = useState<IJob | null>(null);
     const [form] = Form.useForm();
+    const [tagOptions, setTagOptions] = useState(JOB_TAG_OPTIONS);
+    const [tagGuideline, setTagGuideline] = useState<string>('Đang kiểm tra các gói hỗ trợ tag...');
+    const [packageOptions, setPackageOptions] = useState<Array<{
+        value: string;
+        label: string;
+        supportedTags: string[];
+        remainingJobs: number;
+        priority: number;
+        packageName?: string;
+    }>>([]);
+    const [selectedPackageId, setSelectedPackageId] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const init = async () => {
@@ -48,14 +59,46 @@ const ViewUpsertJob = (props: any) => {
                             value: `${res.data.company?._id}@#$${res.data.company?.logo}` as string,
                             key: res.data.company?._id
                         },
-
+                        userPackageId: res.data.userPackageId
                     })
+                    if (res.data.userPackageId) {
+                        setSelectedPackageId(res.data.userPackageId);
+                    }
                 }
             }
         }
         init();
         return () => form.resetFields()
     }, [id])
+
+    useEffect(() => {
+        fetchTagAvailability();
+    }, []);
+
+    useEffect(() => {
+        if (!packageOptions.length) {
+            setSelectedPackageId(undefined);
+            setTagOptions(
+                JOB_TAG_DEFINITIONS.map((def) => ({
+                    label: def.label,
+                    value: def.value,
+                    disabled: def.value !== 'New',
+                }))
+            );
+            setTagGuideline('Bạn chưa có gói đăng tin hoạt động. Vui lòng mua gói để sử dụng tag nâng cao.');
+            return;
+        }
+
+        const preferredId = selectedPackageId || form.getFieldValue('userPackageId');
+        const preferredOption =
+            (preferredId && packageOptions.find((pkg) => pkg.value === preferredId)) || packageOptions[0];
+
+        if (preferredOption) {
+            setSelectedPackageId(preferredOption.value);
+            form.setFieldsValue({ userPackageId: preferredOption.value });
+            applyTagRuleForPackage(preferredOption);
+        }
+    }, [packageOptions]);
 
     // Usage of DebounceSelect
     async function fetchCompanyList(name: string): Promise<ICompanySelect[]> {
@@ -72,27 +115,101 @@ const ViewUpsertJob = (props: any) => {
         } else return [];
     }
 
+    const fetchTagAvailability = async () => {
+        try {
+            const res = await callGetActiveUserPackages();
+            const overview = res?.data;
+            const activePackages = overview?.active || [];
+            const packageOpts: typeof packageOptions = [];
+
+            activePackages.forEach((pkg) => {
+                const serviceInfo = (pkg.packageId as IServicePackage) || null;
+                const stats = pkg.stats;
+                const supportedTags =
+                    (stats?.supportedTags?.length ? stats.supportedTags : serviceInfo?.supportedTags) || ['New'];
+                const remainingJobs =
+                    stats?.remainingJobs ?? Math.max((serviceInfo?.maxJobs || 0) - (pkg.usedJobs || 0), 0);
+
+                if (serviceInfo?._id && pkg._id) {
+                    packageOpts.push({
+                        value: pkg._id,
+                        label: `${serviceInfo.name} • Ưu tiên #${pkg.priority} • Còn ${remainingJobs} lượt`,
+                        supportedTags,
+                        remainingJobs,
+                        priority: pkg.priority,
+                        packageName: serviceInfo.name,
+                    });
+                }
+            });
+
+            setPackageOptions(packageOpts);
+        } catch (error) {
+            console.error('Error fetching tag availability', error);
+            setTagGuideline('Không thể tải thông tin tag. Hãy thử tải lại trang nếu cần.');
+        }
+    };
+
+    const applyTagRuleForPackage = (pkg?: typeof packageOptions[number]) => {
+        if (!pkg) return;
+        const supported = pkg.supportedTags?.length ? pkg.supportedTags : ['New'];
+        const hasSlots = (pkg.remainingJobs ?? 0) > 0;
+        const isEditing = Boolean(dataUpdate?._id);
+        const currentTagValue = dataUpdate?.tag;
+        setTagOptions(
+            JOB_TAG_DEFINITIONS.map((def) => {
+                const isCurrentTag = isEditing && currentTagValue === def.value;
+                const shouldDisable =
+                    !supported.includes(def.value) ||
+                    (!isCurrentTag && !hasSlots);
+                return {
+                    label: def.label,
+                    value: def.value,
+                    disabled: shouldDisable,
+                };
+            })
+        );
+        setTagGuideline(
+            `Gói ${pkg.packageName || ''} (ưu tiên #${pkg.priority}) hỗ trợ: ${supported.join(', ')} • Lượt còn lại: ${pkg.remainingJobs}`
+        );
+    };
+
+    const handlePackageChange = (value: string) => {
+        setSelectedPackageId(value);
+        form.setFieldsValue({ userPackageId: value });
+        const target = packageOptions.find((pkg) => pkg.value === value);
+        if (target) {
+            applyTagRuleForPackage(target);
+            const currentTag = form.getFieldValue('tag');
+            if (currentTag && !target.supportedTags.includes(currentTag)) {
+                form.setFieldsValue({ tag: undefined });
+            }
+        }
+    };
+
     const onFinish = async (values: any) => {
+        const { userPackageId: selectedPackageFromForm, ...jobValues } = values;
+        const packageIdToUse = selectedPackageFromForm || selectedPackageId;
         if (dataUpdate?._id) {
             //update
-            const cp = values?.company?.value?.split('@#$');
+            const cp = jobValues?.company?.value?.split('@#$');
             const job = {
-                name: values.name,
-                skills: values.skills,
+                name: jobValues.name,
+                skills: jobValues.skills,
                 company: {
                     _id: cp && cp.length > 0 ? cp[0] : "",
-                    name: values.company.label,
+                    name: jobValues.company.label,
                     logo: cp && cp.length > 1 ? cp[1] : ""
                 },
-                location: values.location,
-                workingModel: values.workingModel,
-                salary: values.salary,
-                quantity: values.quantity,
-                level: values.level,
+                location: jobValues.location,
+                workingModel: jobValues.workingModel,
+                salary: jobValues.salary,
+                level: jobValues.level,
                 description: value,
-                startDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(values.startDate) ? dayjs(values.startDate, 'DD/MM/YYYY').toDate() : values.startDate,
-                endDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(values.endDate) ? dayjs(values.endDate, 'DD/MM/YYYY').toDate() : values.endDate,
-                isActive: values.isActive
+                startDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(jobValues.startDate) ? dayjs(jobValues.startDate, 'DD/MM/YYYY').toDate() : jobValues.startDate,
+                endDate: /[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/.test(jobValues.endDate) ? dayjs(jobValues.endDate, 'DD/MM/YYYY').toDate() : jobValues.endDate,
+                isActive: jobValues.isActive,
+                tag: jobValues.tag,
+                userPackageId: packageIdToUse
             }
 
             const res = await callUpdateJob(job, dataUpdate._id);
@@ -107,24 +224,25 @@ const ViewUpsertJob = (props: any) => {
             }
         } else {
             //create
-            const cp = values?.company?.value?.split('@#$');
+            const cp = jobValues?.company?.value?.split('@#$');
             const job = {
-                name: values.name,
-                skills: values.skills,
+                name: jobValues.name,
+                skills: jobValues.skills,
                 company: {
                     _id: cp && cp.length > 0 ? cp[0] : "",
-                    name: values.company.label,
+                    name: jobValues.company.label,
                     logo: cp && cp.length > 1 ? cp[1] : ""
                 },
-                location: values.location,
-                workingModel: values.workingModel,
-                salary: values.salary,
-                quantity: values.quantity,
-                level: values.level,
+                location: jobValues.location,
+                workingModel: jobValues.workingModel,
+                salary: jobValues.salary,
+                level: jobValues.level,
                 description: value,
-                startDate: dayjs(values.startDate, 'DD/MM/YYYY').toDate(),
-                endDate: dayjs(values.endDate, 'DD/MM/YYYY').toDate(),
-                isActive: values.isActive
+                startDate: dayjs(jobValues.startDate, 'DD/MM/YYYY').toDate(),
+                endDate: dayjs(jobValues.endDate, 'DD/MM/YYYY').toDate(),
+                isActive: jobValues.isActive,
+                tag: jobValues.tag,
+                userPackageId: packageIdToUse
             }
 
             const res = await callCreateJob(job);
@@ -239,14 +357,6 @@ const ViewUpsertJob = (props: any) => {
                                 />
                             </Col>
                             <Col span={24} md={6}>
-                                <ProFormDigit
-                                    label="Số lượng"
-                                    name="quantity"
-                                    rules={[{ required: true, message: 'Vui lòng không bỏ trống' }]}
-                                    placeholder="Nhập số lượng"
-                                />
-                            </Col>
-                            <Col span={24} md={6}>
                                 <ProFormSelect
                                     name="level"
                                     label="Trình độ"
@@ -328,6 +438,38 @@ const ViewUpsertJob = (props: any) => {
                                         defaultChecked: true,
                                     }}
                                 />
+                            </Col>
+                            <Col span={24} md={6}>
+                                <ProFormSelect
+                                    name="userPackageId"
+                                    label="Chọn gói sử dụng"
+                                    options={packageOptions}
+                                    placeholder="Chọn gói sẽ bị trừ lượt"
+                                    fieldProps={{
+                                        onChange: (value: string) => handlePackageChange(value),
+                                    }}
+                                    rules={packageOptions.length ? [{ required: true, message: 'Vui lòng chọn gói để trừ lượt' }] : []}
+                                    allowClear={false}
+                                    disabled={!packageOptions.length}
+                                />
+                            </Col>
+                            <Col span={24} md={6}>
+                                <ProFormSelect
+                                    name="tag"
+                                    label="Tag"
+                                    options={tagOptions}
+                                    placeholder="Chọn tag (tùy chọn)"
+                                    allowClear
+                                />
+                                {tagGuideline && (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Quyền sử dụng tag"
+                                        description={tagGuideline}
+                                        style={{ marginTop: 8 }}
+                                    />
+                                )}
                             </Col>
                             <Col span={24}>
                                 <ProForm.Item

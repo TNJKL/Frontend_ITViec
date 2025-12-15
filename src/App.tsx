@@ -25,6 +25,8 @@ import PermissionPage from './pages/admin/permission';
 import ResumePage from './pages/admin/resume';
 import RolePage from './pages/admin/role';
 import UserPage from './pages/admin/user';
+import AdminServicePackagePage from './pages/admin/service-package';
+import InterviewListPage from './pages/hr/InterviewList';
 import { fetchAccount } from './redux/slice/accountSlide';
 import LayoutApp from './components/share/layout.app';
 import JobPage from './pages/admin/job';
@@ -37,6 +39,15 @@ import ClientCompanyDetailPage from './pages/company/detail';
 import ManageAccountPage from './pages/account/manage';
 import CVTemplatesPage from './pages/cv/templates';
 import CVPreviewPage from './pages/cv/preview';
+import ServicePackagePage from './pages/service-package';
+import PaymentSuccessPage from './pages/payment/success';
+import PaymentFailedPage from './pages/payment/failed';
+import PaymentCallbackPage from './pages/payment/callback';
+import MyInterviewsPage from './pages/candidate/MyInterviews';
+import NotificationsPage from './pages/account/notifications';
+import VerifyOtpPage from './pages/auth/verify-otp';
+import EmployerRegisterPage from './pages/auth/employer-register';
+import EmployerApplicationsPage from './pages/admin/employer-applications';
 // dayjs config is imported globally via './config/dayjs'
 
 const LayoutClient = () => {
@@ -89,7 +100,8 @@ export default function App() {
         { path: "company", element: <ClientCompanyPage /> },
         { path: "company/:id", element: <ClientCompanyDetailPage /> },
         { path: "cv/templates", element: <CVTemplatesPage /> },
-        { path: "cv/preview", element: <ProtectedRoute allowNormalUser={true}><CVPreviewPage /></ProtectedRoute> }
+        { path: "cv/preview", element: <ProtectedRoute allowNormalUser={true}><CVPreviewPage /></ProtectedRoute> },
+        { path: "service-package", element: <ProtectedRoute allowNormalUser={true}><ServicePackagePage /></ProtectedRoute> }
       ],
     },
 
@@ -98,7 +110,10 @@ export default function App() {
       element: (<LayoutApp><LayoutClient /></LayoutApp>),
       errorElement: <NotFound />,
       children: [
-        { path: "manage", element: <ProtectedRoute allowNormalUser={true}><ManageAccountPage /></ProtectedRoute> }
+        { path: "manage", element: <ProtectedRoute allowNormalUser={true}><ManageAccountPage /></ProtectedRoute> },
+        { path: "interviews", element: <ProtectedRoute allowNormalUser={true}><MyInterviewsPage /></ProtectedRoute> },
+        { path: "interviews/:id", element: <ProtectedRoute allowNormalUser={true}><MyInterviewsPage /></ProtectedRoute> },
+        { path: "notifications", element: <ProtectedRoute allowNormalUser={true}><NotificationsPage /></ProtectedRoute> }
       ]
     },
 
@@ -150,6 +165,13 @@ export default function App() {
             </ProtectedRoute>
         },
         {
+          path: "interviews",
+          element:
+            <ProtectedRoute>
+              <InterviewListPage />
+            </ProtectedRoute>
+        },
+        {
           path: "permission",
           element:
             <ProtectedRoute>
@@ -161,6 +183,20 @@ export default function App() {
           element:
             <ProtectedRoute>
               <RolePage />
+            </ProtectedRoute>
+        },
+        {
+          path: "service-package",
+          element:
+            <ProtectedRoute>
+              <AdminServicePackagePage />
+            </ProtectedRoute>
+        },
+        {
+          path: "employer-applications",
+          element:
+            <ProtectedRoute>
+              <EmployerApplicationsPage />
             </ProtectedRoute>
         }
       ],
@@ -175,6 +211,26 @@ export default function App() {
     {
       path: "/register",
       element: <RegisterPage />,
+    },
+    {
+      path: "/employer-register",
+      element: <EmployerRegisterPage />,
+    },
+    {
+      path: "/verify-otp",
+      element: <VerifyOtpPage />,
+    },
+    {
+      path: "/payment/callback",
+      element: <PaymentCallbackPage />,
+    },
+    {
+      path: "/payment/success",
+      element: <PaymentSuccessPage />,
+    },
+    {
+      path: "/payment/failed",
+      element: <PaymentFailedPage />,
     },
   ]);
 

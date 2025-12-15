@@ -1,4 +1,4 @@
-import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume, IPermission, IRole, ISubscribers, IDashboardOverview, IResumeCheck } from '@/types/backend';
+import { IBackendRes, ICompany, IAccount, IUser, IModelPaginate, IGetAccount, IJob, IResume, IPermission, IRole, ISubscribers, IDashboardOverview, IResumeCheck, IServicePackage, IUserPackage, IPaymentResponse, IUserActivePackage, IUserPackagesOverview, IInterview, INotification } from '@/types/backend';
 import axios from 'config/axios-customize';
 
 /**
@@ -7,6 +7,23 @@ Module Auth
  */
 export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string, phone: string) => {
     return axios.post<IBackendRes<IUser>>('/api/v1/auth/register', { name, email, password, age, gender, address, phone })
+}
+
+export const callSendRegisterOtp = (email: string) => {
+    return axios.post<IBackendRes<any>>('/api/v1/auth/register/otp', { email })
+}
+
+export const callVerifyRegisterOtp = (payload: {
+    name: string;
+    email: string;
+    password: string;
+    age: number;
+    gender: string;
+    address: string;
+    phone: string;
+    otp: string;
+}) => {
+    return axios.post<IBackendRes<IUser>>('/api/v1/auth/register/verify', payload)
 }
 
 export const callLogin = (username: string, password: string) => {
@@ -23,6 +40,32 @@ export const callRefreshToken = () => {
 
 export const callLogout = () => {
     return axios.post<IBackendRes<string>>('/api/v1/auth/logout')
+}
+
+/**
+ * Employer Applications
+ */
+export const callCreateEmployerApplication = (payload: {
+    name: string;
+    email: string;
+    phone: string;
+    companyName: string;
+    companyAddress: string;
+    website?: string;
+}) => {
+    return axios.post<IBackendRes<any>>('/api/v1/employer-applications', payload);
+}
+
+export const callGetEmployerApplications = (query = '') => {
+    return axios.get<IBackendRes<any>>(`/api/v1/employer-applications?${query}`);
+}
+
+export const callApproveEmployerApplication = (id: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/employer-applications/${id}/approve`, {});
+}
+
+export const callRejectEmployerApplication = (id: string, note?: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/employer-applications/${id}/reject`, { note });
 }
 
 /**
@@ -269,5 +312,119 @@ export const callFetchSubscriberById = (id: string) => {
  */
 export const callFetchDashboardOverview = () => {
     return axios.get<IBackendRes<IDashboardOverview>>('/api/v1/dashboard/overview');
+}
+
+/**
+ * 
+ * Module Service Packages
+ */
+export const callCreateServicePackage = (servicePackage: IServicePackage) => {
+    return axios.post<IBackendRes<IServicePackage>>('/api/v1/service-packages', { ...servicePackage });
+}
+
+export const callUpdateServicePackage = (servicePackage: IServicePackage, id: string) => {
+    return axios.patch<IBackendRes<IServicePackage>>(`/api/v1/service-packages/${id}`, { ...servicePackage });
+}
+
+export const callDeleteServicePackage = (id: string) => {
+    return axios.delete<IBackendRes<IServicePackage>>(`/api/v1/service-packages/${id}`);
+}
+
+export const callFetchServicePackageById = (id: string) => {
+    return axios.get<IBackendRes<IServicePackage>>(`/api/v1/service-packages/${id}`);
+}
+
+export const callFetchServicePackages = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IServicePackage>>>(`/api/v1/service-packages?${query}`);
+}
+
+export const callFetchActiveServicePackages = () => {
+    return axios.get<IBackendRes<IServicePackage[]>>('/api/v1/service-packages/active');
+}
+
+/**
+ * 
+ * Module Payments
+ */
+export const callCreatePayment = (packageId: string) => {
+    return axios.post<IBackendRes<IPaymentResponse>>('/api/v1/payments/create', { packageId });
+}
+
+export const callGetCurrentPackage = () => {
+    return axios.get<IBackendRes<IUserPackage>>('/api/v1/payments/current-package');
+}
+
+export const callGetActiveUserPackages = () => {
+    return axios.get<IBackendRes<IUserPackagesOverview>>('/api/v1/payments/active-packages');
+}
+
+export const callVerifyPayment = (queryParams: Record<string, string>) => {
+    return axios.get<IBackendRes<{ success: boolean; message: string; data?: any }>>('/api/v1/payments/callback', { params: queryParams });
+}
+
+/**
+ * 
+ * Module Interviews
+ */
+export const callCreateInterview = (interview: Partial<IInterview>) => {
+    return axios.post<IBackendRes<IInterview>>('/api/v1/interviews', interview);
+}
+
+export const callGetInterviews = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IInterview>>>(`/api/v1/interviews?${query}`);
+}
+
+export const callGetMyInterviews = () => {
+    return axios.get<IBackendRes<IInterview[]>>('/api/v1/interviews/my-interviews');
+}
+
+export const callGetInterviewById = (id: string) => {
+    return axios.get<IBackendRes<IInterview>>(`/api/v1/interviews/${id}`);
+}
+
+export const callUpdateInterview = (id: string, interview: Partial<IInterview>) => {
+    return axios.patch<IBackendRes<IInterview>>(`/api/v1/interviews/${id}`, interview);
+}
+
+export const callConfirmInterview = (id: string) => {
+    return axios.patch<IBackendRes<{ message: string }>>(`/api/v1/interviews/${id}/confirm`);
+}
+
+export const callUpdateInterviewResult = (id: string, result: { result?: string; feedback?: string }) => {
+    return axios.patch<IBackendRes<{ message: string }>>(`/api/v1/interviews/${id}/result`, result);
+}
+
+export const callCancelInterview = (id: string, cancelReason: string) => {
+    return axios.delete<IBackendRes<{ message: string }>>(`/api/v1/interviews/${id}`, {
+        data: { cancelReason }
+    });
+}
+
+/**
+ * 
+ * Module Notifications
+ */
+export const callGetNotifications = (query?: string) => {
+    return axios.get<IBackendRes<INotification[]>>(`/api/v1/notifications${query ? `?${query}` : ''}`);
+}
+
+export const callGetUnreadNotificationCount = () => {
+    return axios.get<IBackendRes<number>>('/api/v1/notifications/unread-count');
+}
+
+export const callMarkNotificationAsRead = (id: string) => {
+    return axios.patch<IBackendRes<INotification>>(`/api/v1/notifications/${id}/read`);
+}
+
+export const callMarkAllNotificationsAsRead = () => {
+    return axios.patch<IBackendRes<{ modifiedCount: number }>>('/api/v1/notifications/read-all');
+}
+
+export const callDeleteNotification = (id: string) => {
+    return axios.delete<IBackendRes<INotification>>(`/api/v1/notifications/${id}`);
+}
+
+export const callDeleteAllReadNotifications = () => {
+    return axios.delete<IBackendRes<{ deletedCount: number }>>('/api/v1/notifications/read-all');
 }
 

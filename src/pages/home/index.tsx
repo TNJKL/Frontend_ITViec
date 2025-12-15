@@ -1,5 +1,5 @@
 import { Divider, Card, Button } from 'antd';
-import { FileTextOutlined, DownloadOutlined } from '@ant-design/icons';
+import { FileTextOutlined, DownloadOutlined, GiftOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import styles from 'styles/client.module.scss';
 import SearchClient from '@/components/client/search.client';
@@ -64,6 +64,69 @@ const HomePage = () => {
                             style={{ borderRadius: 8 }}
                         >
                             Xem mẫu CV
+                        </Button>
+                    </Link>
+                </div>
+            </Card>
+            <Divider />
+            <Card
+                style={{
+                    borderRadius: 12,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    marginBottom: 40,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none'
+                }}
+                bodyStyle={{ padding: 30 }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <div style={{
+                        width: 80,
+                        height: 80,
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                    }}>
+                        <GiftOutlined style={{ fontSize: 40, color: '#fff' }} />
+                        <div style={{
+                            position: 'absolute',
+                            bottom: -5,
+                            right: -5,
+                            background: '#ff4d4f',
+                            color: '#fff',
+                            borderRadius: 12,
+                            padding: '2px 8px',
+                            fontSize: 11,
+                            fontWeight: 'bold'
+                        }}>
+                            HOT
+                        </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <h3 style={{ margin: 0, marginBottom: 8, fontSize: 20, fontWeight: 600, color: '#fff' }}>
+                            Gói Dịch Vụ Đăng Tin
+                        </h3>
+                        <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.9)', fontSize: 14 }}>
+                            Nâng cấp gói dịch vụ để đăng nhiều tin tuyển dụng hơn với thời hạn dài hơn và nhiều quyền lợi hơn
+                        </p>
+                    </div>
+                    <Link to="/service-package">
+                        <Button
+                            type="primary"
+                            icon={<GiftOutlined />}
+                            size="large"
+                            style={{ 
+                                borderRadius: 8,
+                                background: '#fff',
+                                color: '#667eea',
+                                border: 'none',
+                                fontWeight: 600
+                            }}
+                        >
+                            Mua gói dịch vụ
                         </Button>
                     </Link>
                 </div>

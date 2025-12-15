@@ -20,7 +20,14 @@ export default defineConfig(({ command, mode }) => {
       // visualizer() as PluginOption
     ],
     server: {
-      port: parseInt(env.PORT)
+      port: parseInt(env.PORT),
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
     },
     resolve: {
       alias: {

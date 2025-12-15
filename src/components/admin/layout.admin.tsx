@@ -12,8 +12,10 @@ import {
     HeartTwoTone,
     BugOutlined,
     ScheduleOutlined,
+    GiftOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
+import NotificationBell from '../common/NotificationBell';
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import { callLogout } from 'config/api';
@@ -70,6 +72,16 @@ const LayoutAdmin = () => {
                 && item.method === ALL_PERMISSIONS.USERS.GET_PAGINATE.method
             )
 
+            const viewServicePackage = permissions.find(item =>
+                item.apiPath === ALL_PERMISSIONS.SERVICE_PACKAGES.GET_PAGINATE.apiPath
+                && item.method === ALL_PERMISSIONS.SERVICE_PACKAGES.GET_PAGINATE.method
+            )
+
+            const viewEmployerApp = permissions.find(item =>
+                item.apiPath === ALL_PERMISSIONS.EMPLOYER_APPLICATIONS.GET_PAGINATE.apiPath
+                && item.method === ALL_PERMISSIONS.EMPLOYER_APPLICATIONS.GET_PAGINATE.method
+            )
+
             const full = [
                 {
                     label: <Link to='/admin'>Dashboard</Link>,
@@ -98,6 +110,11 @@ const LayoutAdmin = () => {
                     key: '/admin/resume',
                     icon: <AliwangwangOutlined />
                 }] : []),
+                ...(viewResume ? [{
+                    label: <Link to='/admin/interviews'>Lịch phỏng vấn</Link>,
+                    key: '/admin/interviews',
+                    icon: <ScheduleOutlined />
+                }] : []),
                 ...(viewPermission ? [{
                     label: <Link to='/admin/permission'>Permission</Link>,
                     key: '/admin/permission',
@@ -107,6 +124,16 @@ const LayoutAdmin = () => {
                     label: <Link to='/admin/role'>Role</Link>,
                     key: '/admin/role',
                     icon: <ExceptionOutlined />
+                }] : []),
+                ...(viewServicePackage ? [{
+                    label: <Link to='/admin/service-package'>Gói dịch vụ</Link>,
+                    key: '/admin/service-package',
+                    icon: <GiftOutlined />
+                }] : []),
+                ...(viewEmployerApp ? [{
+                    label: <Link to='/admin/employer-applications'>Hồ sơ nhà tuyển dụng</Link>,
+                    key: '/admin/employer-applications',
+                    icon: <BankOutlined />
                 }] : []),
 
 
@@ -199,13 +226,15 @@ const LayoutAdmin = () => {
                                 }}
                             />
 
-                            <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
-                                <Space style={{ cursor: "pointer" }}>
-                                    Welcome {user?.name}
-                                    <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
-
-                                </Space>
-                            </Dropdown>
+                            <Space size="middle">
+                                <NotificationBell />
+                                <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
+                                    <Space style={{ cursor: "pointer" }}>
+                                        Welcome {user?.name}
+                                        <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
+                                    </Space>
+                                </Dropdown>
+                            </Space>
                         </div>
                     }
                     <Content style={{ padding: '15px' }}>

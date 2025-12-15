@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, Tag, message, notification, Menu, Space, Card, Popconfirm, DatePicker, Switch, Spin, Upload } from "antd";
+import { Button, Col, Form, Input, Modal, Row, Select, Table, Tabs, Tag, message, notification, Menu, Space, Card, Popconfirm, DatePicker, Switch, Spin, Upload, Tooltip } from "antd";
 import type { TabsProps, UploadProps } from 'antd';
 import { IResume, IUser } from "@/types/backend";
 import { useEffect, useMemo, useState } from 'react';
@@ -65,14 +65,27 @@ const UserResume = () => {
 
     const renderStatus = (status?: string) => {
         const map: Record<string, { color: string; text: string }> = {
-            PENDING: { color: 'gold', text: 'Pending' },
-            REVIEWING: { color: 'blue', text: 'Reviewing' },
-            APPROVED: { color: 'green', text: 'Approved' },
-            REJECTED: { color: 'red', text: 'Rejected' },
+            PENDING: { color: 'gold', text: 'Chờ duyệt' },
+            REVIEWING: { color: 'blue', text: 'Đang xem xét' },
+            APPROVED: { color: 'green', text: 'Đã duyệt' },
+            REJECTED: { color: 'red', text: 'Từ chối' },
+            INTERVIEW_SCHEDULED: { color: 'cyan', text: 'Đã đặt lịch' },
+            INTERVIEW_CONFIRMED: { color: 'success', text: 'Ứng viên xác nhận' },
+            INTERVIEW_COMPLETED: { color: 'purple', text: 'Hoàn thành phỏng vấn' },
+            INTERVIEW_CANCELLED: { color: 'volcano', text: 'Lịch phỏng vấn bị hủy' },
+            OFFERED: { color: 'geekblue', text: 'Đã gửi offer' },
+            ACCEPTED: { color: 'lime', text: 'Ứng viên nhận offer' },
+            DECLINED: { color: 'magenta', text: 'Ứng viên từ chối' },
         };
         const key = (status || '').toUpperCase();
         const cfg = map[key] || { color: 'default', text: status || '-' };
-        return <Tag color={cfg.color}>{cfg.text}</Tag>
+        return (
+            <Tooltip title={cfg.text}>
+                <Tag color={cfg.color} className="resume-status-tag">
+                    {cfg.text}
+                </Tag>
+            </Tooltip>
+        );
     }
 
     const handleOpenUpdate = (resume: IResume) => {
@@ -203,6 +216,20 @@ const UserResume = () => {
                 }
                 .user-resume-table .ant-table-body::-webkit-scrollbar-thumb:hover {
                     background: rgba(0, 0, 0, 0.3);
+                }
+                .resume-status-tag {
+                    max-width: 110px;
+                    display: inline-flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 4px 8px;
+                    font-weight: 600;
+                    font-size: 11px;
+                    line-height: 1.3;
+                    text-align: center;
+                    white-space: normal;
+                    word-break: break-word;
+                    border-radius: 999px;
                 }
             `}</style>
             <div className="user-resume-table" style={{ background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.1)', width: '100%', margin: 0 }}>

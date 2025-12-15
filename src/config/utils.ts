@@ -70,6 +70,19 @@ export const getLocationName = (value: string) => {
     return 'unknown'
 }
 
+export const JOB_TAG_DEFINITIONS = [
+    { label: 'New', value: 'New', color: '#52c41a', background: '#f6ffed' },
+    { label: 'Hot', value: 'Hot', color: '#fa8c16', background: '#fff7e6' },
+    { label: 'Super Hot', value: 'Super Hot', color: '#ff4d4f', background: '#fff1f0' },
+];
+
+export const JOB_TAG_OPTIONS = JOB_TAG_DEFINITIONS.map(({ label, value }) => ({ label, value }));
+
+export const getJobTagStyle = (tag?: string) => {
+    if (!tag) return JOB_TAG_DEFINITIONS[0];
+    return JOB_TAG_DEFINITIONS.find((item) => item.value === tag) || JOB_TAG_DEFINITIONS[0];
+}
+
 export function colorMethod(method: "POST" | "PUT" | "GET" | "DELETE" | string) {
     switch (method) {
         case "POST":

@@ -1,8 +1,11 @@
 import { callUpdateResumeStatus } from "@/config/api";
-import { IResume } from "@/types/backend";
-import { Badge, Button, Descriptions, Drawer, Form, Select, message, notification } from "antd";
+import { IResume, IJob } from "@/types/backend";
+import { Button, Descriptions, Drawer, Form, Modal, Select, Space, message, notification } from "antd";
+import { EyeOutlined, CalendarOutlined } from "@ant-design/icons";
 import dayjs from 'dayjs';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import CreateInterviewModal from '../../hr/CreateInterviewModal';
+import { RESUME_STATUS_OPTIONS, RESUME_STATUS_TRANSITIONS, ResumeStatus } from "@/config/constants/resume";
 const { Option } = Select;
 
 interface IProps {
@@ -16,6 +19,48 @@ const ViewDetailResume = (props: IProps) => {
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
     const { onClose, open, dataInit, setDataInit, reloadTable } = props;
     const [form] = Form.useForm();
+    const [previewOpen, setPreviewOpen] = useState<boolean>(false);
+    const [interviewModalOpen, setInterviewModalOpen] = useState<boolean>(false);
+    const [selectedInterviewResume, setSelectedInterviewResume] = useState<IResume | null>(null);
+    const [selectedInterviewJob, setSelectedInterviewJob] = useState<IJob | null>(null);
+    const resumeUrl = dataInit?.url ? `${import.meta.env.VITE_BACKEND_URL}/images/resume/${dataInit.url}` : "";
+    
+    const canCreateInterview = dataInit?.status === 'APPROVED' || dataInit?.status === 'REVIEWING';
+
+    const availableStatusOptions = useMemo(() => {
+        const currentStatus = dataInit?.status as ResumeStatus | undefined;
+        if (!currentStatus) return RESUME_STATUS_OPTIONS;
+
+        const isKnownStatus = RESUME_STATUS_OPTIONS.some(option => option.value === currentStatus);
+        const allowedValues = new Set<string>();
+        allowedValues.add(currentStatus);
+
+        if (isKnownStatus) {
+            const transitions = RESUME_STATUS_TRANSITIONS[currentStatus] || [];
+            transitions.forEach(status => allowedValues.add(status));
+        } else {
+            // Nếu backend trả status lạ, vẫn return option hiện tại + tất cả option chuẩn
+            return [{ value: currentStatus, label: currentStatus }, ...RESUME_STATUS_OPTIONS];
+        }
+
+        return RESUME_STATUS_OPTIONS.filter(option => allowedValues.has(option.value));
+    }, [dataInit?.status]);
+
+    const handlePreviewResume = () => {
+        if (!resumeUrl) {
+            message.warning("Không tìm thấy file CV để xem trước");
+            return;
+        }
+        setPreviewOpen(true);
+    };
+
+    const handleOpenResume = () => {
+        if (!resumeUrl) {
+            message.warning("Không tìm thấy file CV để mở");
+            return;
+        }
+        window.open(resumeUrl, '_blank', 'noopener');
+    };
 
     const handleChangeStatus = async () => {
         setIsSubmit(true);
@@ -44,6 +89,12 @@ const ViewDetailResume = (props: IProps) => {
         return () => form.resetFields();
     }, [dataInit])
 
+    useEffect(() => {
+        if (!open) {
+            setPreviewOpen(false);
+        }
+    }, [open]);
+
     return (
         <>
             <Drawer
@@ -55,11 +106,24 @@ const ViewDetailResume = (props: IProps) => {
                 maskClosable={false}
                 destroyOnClose
                 extra={
-
-                    <Button loading={isSubmit} type="primary" onClick={handleChangeStatus}>
-                        Change Status
-                    </Button>
-
+                    <Space>
+                        {canCreateInterview && (
+                            <Button
+                                type="default"
+                                icon={<CalendarOutlined />}
+                                onClick={() => {
+                                    setSelectedInterviewResume(dataInit);
+                                    setSelectedInterviewJob(dataInit?.jobId as IJob);
+                                    setInterviewModalOpen(true);
+                                }}
+                            >
+                                Tạo lịch phỏng vấn
+                            </Button>
+                        )}
+                        <Button loading={isSubmit} type="primary" onClick={handleChangeStatus}>
+                            Change Status
+                        </Button>
+                    </Space>
                 }
             >
                 <Descriptions title="" bordered column={2} layout="vertical">
@@ -70,16 +134,14 @@ const ViewDetailResume = (props: IProps) => {
                         >
                             <Form.Item name={"status"}>
                                 <Select
-                                    // placeholder="Select a option and change input text above"
-                                    // onChange={onGenderChange}
-                                    // allowClear
                                     style={{ width: "100%" }}
                                     defaultValue={dataInit?.status}
                                 >
-                                    <Option value="PENDING">PENDING</Option>
-                                    <Option value="REVIEWING">REVIEWING</Option>
-                                    <Option value="APPROVED">APPROVED</Option>
-                                    <Option value="REJECTED">REJECTED</Option>
+                                    {availableStatusOptions.map(option => (
+                                        <Option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </Option>
+                                    ))}
                                 </Select>
                             </Form.Item>
                         </Form>
@@ -93,9 +155,61 @@ const ViewDetailResume = (props: IProps) => {
                     </Descriptions.Item>
                     <Descriptions.Item label="Ngày tạo">{dataInit && dataInit.createdAt ? dayjs(dataInit.createdAt).format('DD-MM-YYYY HH:mm:ss') : ""}</Descriptions.Item>
                     <Descriptions.Item label="Ngày sửa">{dataInit && dataInit.updatedAt ? dayjs(dataInit.updatedAt).format('DD-MM-YYYY HH:mm:ss') : ""}</Descriptions.Item>
+                    <Descriptions.Item label="Tệp CV" span={2}>
+                        <Space>
+                            <Button
+                                type="primary"
+                                size="small"
+                                icon={<EyeOutlined />}
+                                onClick={handlePreviewResume}
+                                disabled={!resumeUrl}
+                            >
+                                Xem trước
+                            </Button>
+                            <Button
+                                type="link"
+                                onClick={handleOpenResume}
+                                disabled={!resumeUrl}
+                                style={{ paddingLeft: 0 }}
+                            >
+                                Chi tiết
+                            </Button>
+                        </Space>
+                    </Descriptions.Item>
 
                 </Descriptions>
             </Drawer>
+            <Modal
+                title="Xem trước CV"
+                open={previewOpen}
+                onCancel={() => setPreviewOpen(false)}
+                footer={null}
+                width={900}
+                bodyStyle={{ height: 600, padding: 0 }}
+                destroyOnClose
+            >
+                {resumeUrl ? (
+                    <iframe src={resumeUrl} style={{ width: '100%', height: '100%', border: 0 }} />
+                ) : (
+                    <div>Không có CV để hiển thị</div>
+                )}
+            </Modal>
+            <CreateInterviewModal
+                open={interviewModalOpen}
+                onClose={() => {
+                    setInterviewModalOpen(false);
+                    setSelectedInterviewResume(null);
+                    setSelectedInterviewJob(null);
+                }}
+                resume={selectedInterviewResume}
+                job={selectedInterviewJob}
+                onSuccess={() => {
+                    reloadTable();
+                    setInterviewModalOpen(false);
+                    setSelectedInterviewResume(null);
+                    setSelectedInterviewJob(null);
+                }}
+            />
         </>
     )
 }

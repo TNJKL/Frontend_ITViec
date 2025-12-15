@@ -1,7 +1,7 @@
 import { Button, Divider, Form, Input, Row, Select, message, notification } from 'antd';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { callRegister } from 'config/api';
+import { callSendRegisterOtp } from 'config/api';
 import styles from 'styles/auth.module.scss';
 import { IUser } from '@/types/backend';
 const { Option } = Select;
@@ -9,19 +9,20 @@ const { Option } = Select;
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const [form] = Form.useForm<IUser>();
     const [isSubmit, setIsSubmit] = useState(false);
 
     const onFinish = async (values: IUser) => {
         const { name, email, password, age, gender, address, phone } = values as any;
         setIsSubmit(true);
-        const res = await callRegister(name, email, password as string, +age, gender, address, phone);
+        const res = await callSendRegisterOtp(email);
         setIsSubmit(false);
-        if (res?.data?._id) {
-            message.success('Đăng ký tài khoản thành công!');
-            navigate('/login')
+        if (res?.data) {
+            message.success('Đã gửi OTP, vui lòng kiểm tra email');
+            navigate('/verify-otp', { state: { formData: { name, email, password, age: +age, gender, address, phone } } });
         } else {
             notification.error({
-                message: "Có lỗi xảy ra",
+                message: "Gửi OTP thất bại",
                 description:
                     res.message && Array.isArray(res.message) ? res.message[0] : res.message,
                 duration: 5
@@ -42,6 +43,7 @@ const RegisterPage = () => {
                         </div>
                         < Form<IUser>
                             name="basic"
+                            form={form}
                             // style={{ maxWidth: 600, margin: '0 auto' }}
                             onFinish={onFinish}
                             autoComplete="off"
@@ -61,7 +63,10 @@ const RegisterPage = () => {
                                 } //whole column
                                 label="Email"
                                 name="email"
-                                rules={[{ required: true, message: 'Email không được để trống!' }]}
+                                rules={[
+                                    { required: true, message: 'Email không được để trống!' },
+                                    { type: 'email', message: 'Email không hợp lệ' }
+                                ]}
                             >
                                 <Input type='email' />
                             </Form.Item>

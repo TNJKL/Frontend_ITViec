@@ -140,12 +140,13 @@ export interface IJob {
     location: string;
     workingModel?: string;
     salary: number;
-    quantity: number;
     level: string;
     description: string;
     startDate: Date;
     endDate: Date;
     isActive: boolean;
+    tag?: string; // "New", "Hot", "Super Hot"
+    userPackageId?: string;
 
     createdBy?: string;
     isDeleted?: boolean;
@@ -228,6 +229,109 @@ export interface ISubscribers {
     deletedAt?: boolean | null;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface IServicePackage {
+    _id?: string;
+    name: string;
+    price: number;
+    maxJobs: number;
+    featuredJobs?: number;
+    durationDays: number;
+    supportedTags?: string[];
+    isActive: boolean;
+    createdBy?: {
+        _id: string;
+        email: string;
+    };
+    updatedBy?: {
+        _id: string;
+        email: string;
+    };
+    deletedBy?: {
+        _id: string;
+        email: string;
+    };
+    createdAt?: string;
+    updatedAt?: string;
+    isDeleted?: boolean;
+    deletedAt?: string;
+}
+
+export interface IUserPackage {
+    _id?: string;
+    userId: string;
+    packageId: string | IServicePackage;
+    startDate: Date | string;
+    endDate: Date | string;
+    usedJobs: number;
+    isActive: boolean;
+    createdBy?: {
+        _id: string;
+        email: string;
+    };
+    createdAt?: string;
+    updatedAt?: string;
+    isDeleted?: boolean;
+    deletedAt?: string;
+}
+
+export interface IUserPackageStats {
+    remainingJobs: number;
+    remainingDays: number;
+    price: number;
+    maxJobs: number;
+    supportedTags?: string[];
+}
+
+export interface IUserActivePackage extends IUserPackage {
+    priority: number;
+    stats?: IUserPackageStats;
+}
+
+export interface IUserPackagesOverview {
+    active: IUserActivePackage[];
+    history: IUserActivePackage[];
+}
+
+export interface IInterview {
+    _id?: string;
+    resumeId: string | IResume;
+    jobId: string | IJob;
+    candidateId: string | IUser;
+    interviewerId: string | IUser;
+    scheduledDate: string | Date;
+    location?: string;
+    interviewType?: 'OFFLINE' | 'ONLINE' | 'HYBRID';
+    meetingLink?: string;
+    notes?: string;
+    status?: 'SCHEDULED' | 'CONFIRMED' | 'RESCHEDULED' | 'COMPLETED' | 'CANCELLED';
+    result?: 'PASSED' | 'FAILED' | 'PENDING';
+    feedback?: string;
+    cancelReason?: string;
+    cancelledAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface INotification {
+    _id?: string;
+    userId: string;
+    title: string;
+    message: string;
+    type: 'INTERVIEW_SCHEDULED' | 'INTERVIEW_CONFIRMED' | 'INTERVIEW_RESCHEDULED' | 'INTERVIEW_CANCELLED' | 'RESUME_APPROVED' | 'RESUME_REJECTED' | 'OFFER_SENT' | 'SYSTEM' | 'OTHER';
+    isRead: boolean;
+    readAt?: string;
+    interviewId?: string | IInterview;
+    resumeId?: string | IResume;
+    jobId?: string | IJob;
+    metadata?: Record<string, any>;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface IPaymentResponse {
+    paymentUrl: string;
 }
 
 export interface IDashboardOverview {

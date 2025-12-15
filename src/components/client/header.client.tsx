@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
+import NotificationBell from '../common/NotificationBell';
 // import ManageAccount from './modal/manage.account';
 
 const Header = (props: any) => {
@@ -44,6 +45,11 @@ const Header = (props: any) => {
             label: <Link to={'/company'}>Top Công ty IT</Link>,
             key: '/company',
             icon: <RiseOutlined />,
+        },
+        {
+            label: <Link to={'/employer-register'}>Nhà tuyển dụng</Link>,
+            key: '/employer-register',
+            icon: <ContactsOutlined />,
         }
     ];
 
@@ -118,12 +124,15 @@ const Header = (props: any) => {
                                     {isAuthenticated === false ?
                                         <Link to={'/login'}>Đăng Nhập</Link>
                                         :
-                                        <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
-                                            <Space style={{ cursor: "pointer" }}>
-                                                <span>Welcome {user?.name}</span>
-                                                <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
-                                            </Space>
-                                        </Dropdown>
+                                        <Space size="middle">
+                                            <NotificationBell />
+                                            <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
+                                                <Space style={{ cursor: "pointer" }}>
+                                                    <span>Welcome {user?.name}</span>
+                                                    <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
+                                                </Space>
+                                            </Dropdown>
+                                        </Space>
                                     }
 
                                 </div>

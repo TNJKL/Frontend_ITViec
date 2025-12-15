@@ -1,5 +1,5 @@
 import { callFetchJob } from '@/config/api';
-import { LOCATION_LIST, convertSlug, getLocationName } from '@/config/utils';
+import { LOCATION_LIST, convertSlug, getLocationName, getJobTagStyle } from '@/config/utils';
 import { IJob } from '@/types/backend';
 import { EnvironmentOutlined, DollarOutlined, HistoryOutlined, UserOutlined } from '@ant-design/icons';
 import { Card, Col, Empty, Pagination, Row, Spin, Tag } from 'antd';
@@ -67,15 +67,6 @@ const JobCard = (props: IProps) => {
         navigate(`/job/${slug}?id=${item._id}`)
     }
 
-    const getRandomBadge = () => {
-        const badges = [
-            { text: 'SUPER HOT', color: '#ff4d4f', bg: '#fff1f0' },
-            { text: 'HOT', color: '#fa8c16', bg: '#fff7e6' },
-            { text: 'NEW', color: '#52c41a', bg: '#f6ffed' },
-        ];
-        return badges[Math.floor(Math.random() * badges.length)];
-    }
-
     return (
         <div className={`${styles["card-job-section"]}`}>
             <div className={`${styles["job-content"]}`}>
@@ -91,7 +82,7 @@ const JobCard = (props: IProps) => {
                         </Col>
 
                         {displayJob?.map(item => {
-                            const badge = getRandomBadge();
+                            const badge = item.tag ? getJobTagStyle(item.tag) : null;
                             return (
                                 <Col span={24} md={8} key={item._id}>
                                     <div
@@ -107,9 +98,11 @@ const JobCard = (props: IProps) => {
                                             height: '100%'
                                         }}
                                     >
-                                        <span style={{ position: 'absolute', right: 12, top: 12, fontSize: 12, fontWeight: 700, color: badge.color, background: badge.bg, padding: '2px 8px', borderRadius: 12 }}>
-                                            {badge.text}
-                                        </span>
+                                        {badge && (
+                                            <span style={{ position: 'absolute', right: 12, top: 12, fontSize: 12, fontWeight: 700, color: badge.color, background: badge.background, padding: '2px 8px', borderRadius: 12 }}>
+                                                {badge.label.toUpperCase()}
+                                            </span>
+                                        )}
                                         <div style={{ display: 'flex', gap: 10 }}>
                                             <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', flexShrink: 0, border: '1px solid #f0f0f0' }}>
                                                 <img

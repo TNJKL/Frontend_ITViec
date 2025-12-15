@@ -1,3 +1,42 @@
+// Helpers chung cho tất cả template: in nhiều trang, chống vỡ layout khi nội dung dài
+.cv-template {
+  .cv-section,
+  .cv-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  // Có thể chèn <div class="page-break" /> giữa các block nếu muốn ép sang trang mới
+  .page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .cv-template .cv-container {
+    box-shadow: none;
+    margin: 0 auto;
+    min-height: auto; // Cho phép chảy sang nhiều trang khi dài
+    page-break-after: always;
+  }
+
+  .cv-template .cv-section,
+  .cv-template .cv-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
 // Classic Template
 .cv-template.classic {
   .cv-container {
