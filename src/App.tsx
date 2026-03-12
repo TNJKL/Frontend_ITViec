@@ -48,6 +48,10 @@ import NotificationsPage from './pages/account/notifications';
 import VerifyOtpPage from './pages/auth/verify-otp';
 import EmployerRegisterPage from './pages/auth/employer-register';
 import EmployerApplicationsPage from './pages/admin/employer-applications';
+import ForumListPage from './pages/forum';
+import ForumNewPostPage from './pages/forum/new';
+import ForumPostDetailPage from './pages/forum/detail';
+import AdminForumPostsPage from './pages/admin/forum-posts';
 // dayjs config is imported globally via './config/dayjs'
 
 const LayoutClient = () => {
@@ -101,7 +105,10 @@ export default function App() {
         { path: "company/:id", element: <ClientCompanyDetailPage /> },
         { path: "cv/templates", element: <CVTemplatesPage /> },
         { path: "cv/preview", element: <ProtectedRoute allowNormalUser={true}><CVPreviewPage /></ProtectedRoute> },
-        { path: "service-package", element: <ProtectedRoute allowNormalUser={true}><ServicePackagePage /></ProtectedRoute> }
+        { path: "service-package", element: <ProtectedRoute allowNormalUser={true}><ServicePackagePage /></ProtectedRoute> },
+        { path: "forum", element: <ForumListPage /> },
+        { path: "forum/new", element: <ProtectedRoute allowNormalUser={true}><ForumNewPostPage /></ProtectedRoute> },
+        { path: "forum/posts/:id", element: <ForumPostDetailPage /> },
       ],
     },
 
@@ -197,6 +204,13 @@ export default function App() {
           element:
             <ProtectedRoute>
               <EmployerApplicationsPage />
+            </ProtectedRoute>
+        },
+        {
+          path: "forum-posts",
+          element:
+            <ProtectedRoute>
+              <AdminForumPostsPage />
             </ProtectedRoute>
         }
       ],

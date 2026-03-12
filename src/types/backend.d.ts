@@ -361,6 +361,11 @@ export interface IDashboardOverview {
             uniqueApplicantsThisMonth: number;
         };
         companies: number;
+        servicePackages: {
+            total: number;
+            totalSold: number;
+            totalRevenue: number;
+        };
     };
     trends: {
         applicationsLast7Days: Array<{
@@ -369,6 +374,11 @@ export interface IDashboardOverview {
         }>;
         jobsLast6Months: Array<{
             month: string;
+            count: number;
+        }>;
+        revenueLast6Months: Array<{
+            month: string;
+            revenue: number;
             count: number;
         }>;
     };
@@ -395,6 +405,30 @@ export interface IDashboardOverview {
             companyNames?: string[];
             totalJobs: number;
             lastPostedAt?: string;
+        }>;
+    };
+    revenue: {
+        byPackage: Array<{
+            _id: string;
+            packageName: string;
+            packagePrice: number;
+            totalSold: number;
+            totalRevenue: number;
+        }>;
+        recentSales: Array<{
+            _id: string;
+            packageName: string;
+            packagePrice: number;
+            packageMaxJobs: number;
+            packageDurationDays: number;
+            userName: string;
+            userEmail: string;
+            userCompany?: string;
+            startDate: string;
+            endDate: string;
+            usedJobs: number;
+            isActive: boolean;
+            createdAt: string;
         }>;
     };
 }

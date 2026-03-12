@@ -47,6 +47,11 @@ const Header = (props: any) => {
             icon: <RiseOutlined />,
         },
         {
+            label: <Link to={'/forum'}>Diễn đàn</Link>,
+            key: '/forum',
+            icon: <CodeOutlined />,
+        },
+        {
             label: <Link to={'/employer-register'}>Nhà tuyển dụng</Link>,
             key: '/employer-register',
             icon: <ContactsOutlined />,
@@ -118,6 +123,7 @@ const Header = (props: any) => {
                                         selectedKeys={[current]}
                                         mode="horizontal"
                                         items={items}
+                                        disabledOverflow
                                     />
                                 </ConfigProvider>
                                 <div className={styles['extra']}>

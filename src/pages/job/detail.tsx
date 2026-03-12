@@ -67,7 +67,7 @@ const ClientJobDetailPage = (props: any) => {
                                 </div>
                                 <div className={styles["salary"]}>
                                     <DollarOutlined />
-                                    <span>&nbsp;{(jobDetail.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</span>
+                                    <span>&nbsp;{(jobDetail.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ</span>
                                 </div>
                                 <div className={styles["location"]}>
                                     <EnvironmentOutlined style={{ color: '#58aaab' }} />&nbsp;{getLocationName(jobDetail.location)}

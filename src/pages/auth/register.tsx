@@ -1,11 +1,15 @@
-import { Button, Divider, Form, Input, Row, Select, message, notification } from 'antd';
+import { Button, Divider, Form, Input, Row, Select, message, notification, Card, Typography } from 'antd';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { callSendRegisterOtp } from 'config/api';
 import styles from 'styles/auth.module.scss';
 import { IUser } from '@/types/backend';
-const { Option } = Select;
+import Header from '@/components/client/header.client';
+import Footer from '@/components/client/footer.client';
+import { UserOutlined, MailOutlined, LockOutlined, UserAddOutlined, PhoneOutlined, HomeOutlined, CalendarOutlined } from '@ant-design/icons';
 
+const { Option } = Select;
+const { Title, Text } = Typography;
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -32,116 +36,200 @@ const RegisterPage = () => {
 
 
     return (
-        <div className={styles["register-page"]} >
-
-            <main className={styles.main} >
-                <div className={styles.container} >
-                    <section className={styles.wrapper} >
-                        <div className={styles.heading} >
-                            <h2 className={`${styles.text} ${styles["text-large"]}`}> Đăng Ký Tài Khoản </h2>
-                            < Divider />
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#f5f7fa' }}>
+            <Header />
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+                <Card
+                    style={{
+                        width: '100%',
+                        maxWidth: 600,
+                        borderRadius: 12,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #e8e8e8',
+                    }}
+                    bodyStyle={{ padding: '40px' }}
+                >
+                    <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                        <div style={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: '50%',
+                            background: '#f0f0f0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 20px',
+                        }}>
+                            <UserAddOutlined style={{ fontSize: 32, color: '#595959' }} />
                         </div>
-                        < Form<IUser>
-                            name="basic"
-                            form={form}
-                            // style={{ maxWidth: 600, margin: '0 auto' }}
-                            onFinish={onFinish}
-                            autoComplete="off"
-                        >
+                        <Title level={2} style={{ margin: 0, color: '#1a1a1a', fontWeight: 600 }}>
+                            Đăng Ký Tài Khoản
+                        </Title>
+                        <Text type="secondary" style={{ fontSize: 14, marginTop: 8, display: 'block' }}>
+                            Tạo tài khoản mới để bắt đầu
+                        </Text>
+                    </div>
+
+                    <Form<IUser>
+                        name="register"
+                        form={form}
+                        onFinish={onFinish}
+                        autoComplete="off"
+                        layout="vertical"
+                        size="large"
+                    >
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Họ tên"
+                                label={<Text strong>Họ tên</Text>}
                                 name="name"
                                 rules={[{ required: true, message: 'Họ tên không được để trống!' }]}
+                                style={{ flex: 1, minWidth: '100%' }}
                             >
-                                <Input />
+                                <Input
+                                    prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập họ tên của bạn"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
+                        </Row>
 
-
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }
-                                } //whole column
-                                label="Email"
+                                label={<Text strong>Email</Text>}
                                 name="email"
                                 rules={[
                                     { required: true, message: 'Email không được để trống!' },
                                     { type: 'email', message: 'Email không hợp lệ' }
                                 ]}
+                                style={{ flex: 1, minWidth: '100%' }}
                             >
-                                <Input type='email' />
+                                <Input
+                                    type='email'
+                                    prefix={<MailOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập email của bạn"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
+                        </Row>
 
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Mật khẩu"
+                                label={<Text strong>Mật khẩu</Text>}
                                 name="password"
                                 rules={[{ required: true, message: 'Mật khẩu không được để trống!' }]}
+                                style={{ flex: 1, minWidth: '100%' }}
                             >
-                                <Input.Password />
+                                <Input.Password
+                                    prefix={<LockOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập mật khẩu"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
+                        </Row>
+
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Tuổi"
+                                label={<Text strong>Tuổi</Text>}
                                 name="age"
                                 rules={[{ required: true, message: 'Tuổi không được để trống!' }]}
+                                style={{ flex: 1, minWidth: 'calc(50% - 8px)' }}
                             >
-                                <Input type='number' />
+                                <Input
+                                    type='number'
+                                    prefix={<CalendarOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập tuổi"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
 
-
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
                                 name="gender"
-                                label="Giới tính"
+                                label={<Text strong>Giới tính</Text>}
                                 rules={[{ required: true, message: 'Giới tính không được để trống!' }]}
+                                style={{ flex: 1, minWidth: 'calc(50% - 8px)' }}
                             >
                                 <Select
-                                    // placeholder="Select a option and change input text above"
-                                    // onChange={onGenderChange}
+                                    placeholder="Chọn giới tính"
                                     allowClear
+                                    style={{ borderRadius: 8 }}
                                 >
                                     <Option value="male">Nam</Option>
                                     <Option value="female">Nữ</Option>
                                     <Option value="other">Khác</Option>
                                 </Select>
                             </Form.Item>
+                        </Row>
 
-
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Địa chỉ"
+                                label={<Text strong>Địa chỉ</Text>}
                                 name="address"
                                 rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}
+                                style={{ flex: 1, minWidth: '100%' }}
                             >
-                                <Input />
+                                <Input
+                                    prefix={<HomeOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập địa chỉ của bạn"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
+                        </Row>
 
+                        <Row gutter={16}>
                             <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Số điện thoại"
+                                label={<Text strong>Số điện thoại</Text>}
                                 name="phone"
                                 rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}
+                                style={{ flex: 1, minWidth: '100%' }}
                             >
-                                <Input />
+                                <Input
+                                    prefix={<PhoneOutlined style={{ color: '#bfbfbf' }} />}
+                                    placeholder="Nhập số điện thoại"
+                                    style={{ borderRadius: 8 }}
+                                />
                             </Form.Item>
+                        </Row>
 
-                            < Form.Item
-                            // wrapperCol={{ offset: 6, span: 16 }}
+                        <Form.Item style={{ marginBottom: 16, marginTop: 8 }}>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={isSubmit}
+                                block
+                                style={{
+                                    height: 48,
+                                    borderRadius: 8,
+                                    fontSize: 16,
+                                    fontWeight: 500,
+                                }}
                             >
-                                <Button type="primary" htmlType="submit" loading={isSubmit} >
-                                    Đăng ký
-                                </Button>
-                            </Form.Item>
-                            <Divider> Or </Divider>
-                            <p className="text text-normal" > Đã có tài khoản ?
-                                <span>
-                                    <Link to='/login' > Đăng Nhập </Link>
-                                </span>
-                            </p>
-                        </Form>
-                    </section>
-                </div>
-            </main>
+                                Đăng ký
+                            </Button>
+                        </Form.Item>
+
+                        <Divider style={{ margin: '24px 0' }}>
+                            <Text type="secondary" style={{ fontSize: 13 }}>Hoặc</Text>
+                        </Divider>
+
+                        <div style={{ textAlign: 'center' }}>
+                            <Text type="secondary" style={{ fontSize: 14 }}>
+                                Đã có tài khoản?{' '}
+                                <Link
+                                    to="/login"
+                                    style={{
+                                        color: '#1890ff',
+                                        fontWeight: 500,
+                                        textDecoration: 'none'
+                                    }}
+                                >
+                                    Đăng nhập ngay
+                                </Link>
+                            </Text>
+                        </div>
+                    </Form>
+                </Card>
+            </div>
+            <Footer />
         </div>
     )
 }

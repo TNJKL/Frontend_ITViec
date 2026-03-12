@@ -428,3 +428,51 @@ export const callDeleteAllReadNotifications = () => {
     return axios.delete<IBackendRes<{ deletedCount: number }>>('/api/v1/notifications/read-all');
 }
 
+/**
+ * 
+ * Module Forum
+ */
+export const callCreateForumPost = (payload: { title: string; content: string; images?: string[] }) => {
+    return axios.post<IBackendRes<any>>('/api/v1/forum/posts', payload);
+}
+
+export const callFetchForumPosts = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<any>>>(`/api/v1/forum/posts?${query}`);
+}
+
+export const callFetchForumPostById = (id: string) => {
+    return axios.get<IBackendRes<any>>(`/api/v1/forum/posts/${id}`);
+}
+
+export const callToggleLikeForumPost = (id: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/forum/posts/${id}/like`, {});
+}
+
+export const callCreateForumComment = (postId: string, payload: { content: string; parentId?: string }) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/forum/posts/${postId}/comments`, payload);
+}
+
+export const callFetchForumComments = (postId: string) => {
+    return axios.get<IBackendRes<any[]>>(`/api/v1/forum/posts/${postId}/comments`);
+}
+
+export const callToggleLikeForumComment = (id: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/forum/comments/${id}/like`, {});
+}
+
+export const callApproveForumPost = (id: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/forum/posts/${id}/approve`, {});
+}
+
+export const callRejectForumPost = (id: string) => {
+    return axios.post<IBackendRes<any>>(`/api/v1/forum/posts/${id}/reject`, {});
+}
+
+export const callUpdateForumPost = (id: string, payload: { title?: string; content?: string; images?: string[] }) => {
+    return axios.patch<IBackendRes<any>>(`/api/v1/forum/posts/${id}`, payload);
+}
+
+export const callDeleteForumPost = (id: string) => {
+    return axios.delete<IBackendRes<any>>(`/api/v1/forum/posts/${id}`);
+}
+

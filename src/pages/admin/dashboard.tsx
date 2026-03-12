@@ -19,7 +19,9 @@ import {
     FileTextOutlined,
     ReloadOutlined,
     SolutionOutlined,
-    TeamOutlined
+    TeamOutlined,
+    GiftOutlined,
+    DollarOutlined
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { callFetchDashboardOverview } from "@/config/api";
@@ -83,6 +85,7 @@ const DashboardPage = () => {
     const roleStats = userTotals?.byRole;
     const jobTotals = totals?.jobs;
     const applicationTotals = totals?.applications;
+    const servicePackagesTotals = totals?.servicePackages;
 
     const roleDistribution = useMemo(() => {
         if (!roleStats || !userTotals) return [];
@@ -552,22 +555,291 @@ const DashboardPage = () => {
                             </Col>
                         </Row>
 
-                        <Row>
-                            <Col span={24}>
+                        <Row gutter={[24, 24]}>
+                            <Col xs={24} lg={8}>
                                 <Card
                                     bordered={false}
                                     style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
                                 >
-                                    <Space align="center">
-                                        <ApartmentOutlined style={{ color: colors.hr }} />
-                                        <Text strong>
-                                            Tổng số công ty đang hoạt động:{" "}
-                                            {formatNumber(totals?.companies ?? 0)}
-                                        </Text>
+                                    <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                                        <Space align="center">
+                                            <ApartmentOutlined style={{ color: colors.hr, fontSize: 24 }} />
+                                            <div>
+                                                <Text type="secondary" style={{ fontSize: 14, display: 'block' }}>Công ty</Text>
+                                                <Text strong style={{ fontSize: 20 }}>
+                                                    {formatNumber(totals?.companies ?? 0)}
+                                                </Text>
+                                            </div>
+                                        </Space>
                                     </Space>
                                 </Card>
                             </Col>
-        </Row>
+                            <Col xs={24} lg={8}>
+                                <Card
+                                    bordered={false}
+                                    style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
+                                >
+                                    <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                                        <Space align="center">
+                                            <GiftOutlined style={{ color: '#52c41a', fontSize: 24 }} />
+                                            <div>
+                                                <Text type="secondary" style={{ fontSize: 14, display: 'block' }}>Gói dịch vụ</Text>
+                                                <Text strong style={{ fontSize: 20 }}>
+                                                    {formatNumber(servicePackagesTotals?.total ?? 0)} gói
+                                                </Text>
+                                                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                                                    Đã bán: {formatNumber(servicePackagesTotals?.totalSold ?? 0)}
+                                                </Text>
+                                            </div>
+                                        </Space>
+                                    </Space>
+                                </Card>
+                            </Col>
+                            <Col xs={24} lg={8}>
+                                <Card
+                                    bordered={false}
+                                    style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
+                                >
+                                    <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                                        <Space align="center">
+                                            <DollarOutlined style={{ color: '#faad14', fontSize: 24 }} />
+                                            <div>
+                                                <Text type="secondary" style={{ fontSize: 14, display: 'block' }}>Doanh thu</Text>
+                                                <Text strong style={{ fontSize: 20, color: '#faad14' }}>
+                                                    {formatNumber(servicePackagesTotals?.totalRevenue ?? 0)} VNĐ
+                                                </Text>
+                                                <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }}>
+                                                    Từ {formatNumber(servicePackagesTotals?.totalSold ?? 0)} gói đã bán
+                                                </Text>
+                                            </div>
+                                        </Space>
+                                    </Space>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        {/* Chi tiết doanh thu */}
+                        <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                            <Col xs={24} lg={12}>
+                                <Card
+                                    bordered={false}
+                                    style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
+                                    title={
+                                        <Space align="center">
+                                            <DollarOutlined style={{ color: '#faad14' }} />
+                                            <span>Doanh thu theo gói dịch vụ</span>
+                                        </Space>
+                                    }
+                                >
+                                    <Table
+                                        dataSource={data?.revenue?.byPackage || []}
+                                        pagination={false}
+                                        size="small"
+                                        scroll={{ y: 300 }}
+                                        rowKey="_id"
+                                    >
+                                        <Table.Column
+                                            title="Gói dịch vụ"
+                                            dataIndex="packageName"
+                                            render={(text: string) => <Text strong>{text}</Text>}
+                                        />
+                                        <Table.Column
+                                            title="Giá"
+                                            dataIndex="packagePrice"
+                                            align="right"
+                                            render={(value: number) => (
+                                                <Text>{formatNumber(value)} VNĐ</Text>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Đã bán"
+                                            dataIndex="totalSold"
+                                            align="center"
+                                            render={(value: number) => (
+                                                <Tag color="blue">{formatNumber(value)}</Tag>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Doanh thu"
+                                            dataIndex="totalRevenue"
+                                            align="right"
+                                            render={(value: number) => (
+                                                <Text strong style={{ color: '#faad14' }}>
+                                                    {formatNumber(value)} VNĐ
+                                                </Text>
+                                            )}
+                                        />
+                                    </Table>
+                                </Card>
+                            </Col>
+                            <Col xs={24} lg={12}>
+                                <Card
+                                    bordered={false}
+                                    style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
+                                    title={
+                                        <Space align="center">
+                                            <DollarOutlined style={{ color: '#faad14' }} />
+                                            <span>Xu hướng doanh thu 6 tháng</span>
+                                        </Space>
+                                    }
+                                >
+                                    <div style={{ minHeight: 300 }}>
+                                        {data?.trends?.revenueLast6Months && data.trends.revenueLast6Months.length > 0 ? (
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "flex-end",
+                                                    gap: 16,
+                                                    minHeight: 240
+                                                }}
+                                            >
+                                                {data.trends.revenueLast6Months.map((item) => {
+                                                    const max = Math.max(...data.trends.revenueLast6Months.map(i => i.revenue), 1);
+                                                    const height = Math.max((item.revenue / max) * 200, 8);
+                                                    const label = dayjs(item.month).format("MM/YYYY");
+                                                    return (
+                                                        <div
+                                                            key={item.month}
+                                                            style={{
+                                                                flex: 1,
+                                                                display: "flex",
+                                                                flexDirection: "column",
+                                                                alignItems: "center",
+                                                                gap: 8
+                                                            }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    width: "100%",
+                                                                    background: "linear-gradient(180deg,#faad14 0%,#ffc53d 100%)",
+                                                                    borderRadius: 10,
+                                                                    height,
+                                                                    transition: "height 0.3s ease"
+                                                                }}
+                                                            />
+                                                            <Text style={{ fontSize: 12, color: "#666" }}>{label}</Text>
+                                                            <Text strong style={{ fontSize: 13, color: '#faad14' }}>
+                                                                {formatNumber(item.revenue)} VNĐ
+                                                            </Text>
+                                                            <Text style={{ fontSize: 11, color: "#999" }}>
+                                                                {item.count} gói
+                                                            </Text>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div style={{ padding: 16, textAlign: "center", color: "#999" }}>
+                                                Chưa có dữ liệu để hiển thị.
+                                            </div>
+                                        )}
+                                    </div>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        {/* Danh sách giao dịch gần đây */}
+                        <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                            <Col span={24}>
+                                <Card
+                                    bordered={false}
+                                    style={{ borderRadius: 16, boxShadow: "0 16px 40px rgba(15,23,42,0.05)" }}
+                                    title={
+                                        <Space align="center">
+                                            <GiftOutlined style={{ color: '#52c41a' }} />
+                                            <span>Giao dịch gần đây</span>
+                                        </Space>
+                                    }
+                                >
+                                    <Table
+                                        dataSource={data?.revenue?.recentSales || []}
+                                        pagination={{ pageSize: 10 }}
+                                        size="small"
+                                        rowKey="_id"
+                                    >
+                                        <Table.Column
+                                            title="Ngày mua"
+                                            dataIndex="createdAt"
+                                            width={120}
+                                            render={(value: string) =>
+                                                dayjs(value).format("DD/MM/YYYY HH:mm")
+                                            }
+                                        />
+                                        <Table.Column
+                                            title="Gói dịch vụ"
+                                            dataIndex="packageName"
+                                            render={(text: string, record: any) => (
+                                                <div>
+                                                    <Text strong>{text}</Text>
+                                                    <div style={{ fontSize: 12, color: '#888' }}>
+                                                        {record.packageMaxJobs} jobs / {record.packageDurationDays} ngày
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Khách hàng"
+                                            render={(_, record: any) => (
+                                                <div>
+                                                    <Text strong>{record.userName || record.userEmail}</Text>
+                                                    {record.userCompany && (
+                                                        <div style={{ fontSize: 12, color: '#888' }}>
+                                                            {record.userCompany}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Giá"
+                                            dataIndex="packagePrice"
+                                            align="right"
+                                            width={120}
+                                            render={(value: number) => (
+                                                <Text strong style={{ color: '#faad14' }}>
+                                                    {formatNumber(value)} VNĐ
+                                                </Text>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Trạng thái"
+                                            dataIndex="isActive"
+                                            align="center"
+                                            width={100}
+                                            render={(isActive: boolean, record: any) => {
+                                                const now = new Date();
+                                                const endDate = new Date(record.endDate);
+                                                const isExpired = endDate < now;
+                                                
+                                                if (isExpired) {
+                                                    return <Tag color="default">Hết hạn</Tag>;
+                                                }
+                                                return <Tag color="green">Đang hoạt động</Tag>;
+                                            }}
+                                        />
+                                        <Table.Column
+                                            title="Đã dùng"
+                                            dataIndex="usedJobs"
+                                            align="center"
+                                            width={100}
+                                            render={(used: number, record: any) => (
+                                                <Text>
+                                                    {used} / {record.packageMaxJobs}
+                                                </Text>
+                                            )}
+                                        />
+                                        <Table.Column
+                                            title="Hết hạn"
+                                            dataIndex="endDate"
+                                            width={120}
+                                            render={(value: string) =>
+                                                dayjs(value).format("DD/MM/YYYY")
+                                            }
+                                        />
+                                    </Table>
+                                </Card>
+                            </Col>
+                        </Row>
                     </Space>
                 )}
             </Skeleton>

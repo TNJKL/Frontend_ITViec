@@ -82,6 +82,11 @@ const LayoutAdmin = () => {
                 && item.method === ALL_PERMISSIONS.EMPLOYER_APPLICATIONS.GET_PAGINATE.method
             )
 
+            const viewForumPosts = permissions.find(item =>
+                item.apiPath === ALL_PERMISSIONS.FORUM.GET_PAGINATE.apiPath
+                && item.method === ALL_PERMISSIONS.FORUM.GET_PAGINATE.method
+            )
+
             const full = [
                 {
                     label: <Link to='/admin'>Dashboard</Link>,
@@ -135,8 +140,11 @@ const LayoutAdmin = () => {
                     key: '/admin/employer-applications',
                     icon: <BankOutlined />
                 }] : []),
-
-
+                ...(viewForumPosts ? [{
+                    label: <Link to='/admin/forum-posts'>Bài viết diễn đàn</Link>,
+                    key: '/admin/forum-posts',
+                    icon: <ExceptionOutlined />
+                }] : []),
 
             ];
 

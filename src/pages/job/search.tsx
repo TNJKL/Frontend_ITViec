@@ -167,10 +167,10 @@ const JobSearchPage = () => {
                 placeholder={<>Salary</>}
                 value={salaryRange ?? undefined}
                 options={[
-                  { label: '0 - 10,000,000 đ', value: '0-10000000' },
-                  { label: '10,000,000 - 20,000,000 đ', value: '10000000-20000000' },
-                  { label: '20,000,000 - 40,000,000 đ', value: '20000000-40000000' },
-                  { label: '40,000,000+ đ', value: '40000000-1000000000' },
+                  { label: '0 - 10.000.000 đ', value: '0-10000000' },
+                  { label: '10.000.000 - 20.000.000 đ', value: '10000000-20000000' },
+                  { label: '20.000.000 - 40.000.000 đ', value: '20000000-40000000' },
+                  { label: '40.000.000+ đ', value: '40000000-1000000000' },
                 ]}
                 onChange={(v) => {
                   setSalaryRange(v as string);
@@ -228,7 +228,7 @@ const JobSearchPage = () => {
                         <div style={{ fontWeight: 600 }}>{j.name}</div>
                         <div style={{ marginTop: 8, background: '#fafafa', padding: '8px 10px', borderRadius: 6 }}>
                           <div style={{ marginBottom: 6 }}><EnvironmentOutlined style={{ color: '#58aaab' }} /> {getLocationName(j.location)}</div>
-                          <div style={{ marginBottom: 6 }}><DollarOutlined /> {(j.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</div>
+                          <div style={{ marginBottom: 6 }}><DollarOutlined /> {(j.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ</div>
                           <div style={{ color: '#888' }}><HistoryOutlined /> {dayjs(j.updatedAt).fromNow()}</div>
                         </div>
                         {j.workingModel && (
@@ -273,7 +273,7 @@ const JobSearchPage = () => {
                     <Tag key={idx} color="gold">{s}</Tag>
                   ))}
                 </div>
-                <div style={{ marginTop: 8 }}><DollarOutlined /> {(selectedJob.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} đ</div>
+                <div style={{ marginTop: 8 }}><DollarOutlined /> {(selectedJob.salary + "")?.replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ</div>
                 <div style={{ marginTop: 8 }}><EnvironmentOutlined style={{ color: '#58aaab' }} /> {getLocationName(selectedJob.location)}</div>
                 {selectedJob.workingModel && (
                   <div style={{ marginTop: 8 }}>

@@ -49,6 +49,18 @@ export const ALL_PERMISSIONS = {
         UPDATE: { method: "PATCH", apiPath: '/api/v1/service-packages/:id', module: "SERVICE_PACKAGES" },
         DELETE: { method: "DELETE", apiPath: '/api/v1/service-packages/:id', module: "SERVICE_PACKAGES" },
     },
+    FORUM: {
+        GET_PAGINATE: { method: "GET", apiPath: '/api/v1/forum/posts', module: "FORUM" },
+        CREATE: { method: "POST", apiPath: '/api/v1/forum/posts', module: "FORUM" },
+        UPDATE: { method: "PATCH", apiPath: '/api/v1/forum/posts/:id', module: "FORUM" },
+        DELETE: { method: "DELETE", apiPath: '/api/v1/forum/posts/:id', module: "FORUM" },
+        APPROVE: { method: "POST", apiPath: '/api/v1/forum/posts/:id/approve', module: "FORUM" },
+        REJECT: { method: "POST", apiPath: '/api/v1/forum/posts/:id/reject', module: "FORUM" },
+        LIKE_POST: { method: "POST", apiPath: '/api/v1/forum/posts/:id/like', module: "FORUM" },
+        LIKE_COMMENT: { method: "POST", apiPath: '/api/v1/forum/comments/:id/like', module: "FORUM" },
+        CREATE_COMMENT: { method: "POST", apiPath: '/api/v1/forum/posts/:postId/comments', module: "FORUM" },
+        GET_BY_ID: { method: "GET", apiPath: '/api/v1/forum/posts/:id', module: "FORUM" },
+    },
 }
 
 export const ALL_MODULES = {
@@ -70,5 +82,6 @@ export const ALL_MODULES = {
     NOTIFICATIONS: 'NOTIFICATIONS',
     EMPLOYER_APPLICATIONS: 'EMPLOYER_APPLICATIONS',
     SERVICE_PACKAGES_MODULE: 'SERVICE_PACKAGES',
+    FORUM: 'FORUM',
     
 }
